@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Medidor Indice</title>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <header class="mb-4">
+            <h1>Projeto de Medição de Rendimento de Produção</h1>
+        </header>
+        <main>
+            <div class="dashboard">
+                <!-- Gráfico de Margem Líquida oculto -->
+                <div class="card mb-3 d-none">
+                    <div class="card-body">
+                        <h2>Margem Líquida</h2>
+                        <canvas id="chart-margem-liquida"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                
+                <div class="card-body">
+                    <h2>Relação Tempo/Falha/Índice</h2>
+                    <canvas id="chart-resultados"></canvas>
+                    <div class="chart-legend mt-2">
+                        <span class="legend-item"
+                            style="background-color: #42c59f; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span>
+                        Tempo
+                        <span class="legend-item"
+                            style="background-color: #f06292; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span>
+                        Falha
+                        <span class="legend-item"
+                            style="background-color: #ffcc00; display: inline-block; width: 20px; height: 20px; border-radius: 50%;"></span>
+                        Índice
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h2>Gráfico de Dispersão</h2>
+                    <canvas id="chart-receita"></canvas>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="card-body">
+                            <h2>Comparação</h2>
+                            <canvas id="chart-lucratividade"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Campo de input CSV posicionado no final do main -->
+            <div class="mb-3">
+                <h2>Selecione o arquivo CSV</h2>
+                <input type="file" id="input-csv" class="form-control" accept=".csv">
+            </div>
+
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
