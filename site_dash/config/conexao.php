@@ -1,37 +1,22 @@
 <?php
-class Conexao
-{
-    private string $host;
-    private string $dbname;
-    private string $username;
-    private string $password;
-    private PDO $pdo;
+class Conexao {
+    private $host = 'localhost';
+    private $db_name = 'projeto_incendio';
+    private $username = 'root';
+    private $password = '1234';
+    private $conn;
 
-    public function __construct(
-        string $host = 'localhost',
-        string $dbname = 'projeto_incendio',
-        string $username = 'root',
-        string $password = '1234'
-    ) {
-        $this->host = $host;
-        $this->dbname = $dbname;
-        $this->username = $username;
-        $this->password = $password;
-    }
+    public function getConnection() {
+        $this->conn = null;
 
-    public function conectarBD(): ?PDO
-    {
         try {
-            $this->pdo = new PDO(
-                "mysql:host={$this->host};dbname={$this->dbname};charset=utf8",
-                $this->username,
-                $this->password
-            );
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            return $this->pdo;
-        } catch (PDOException $e) {
-            echo "Erro na conexão: " . $e->getMessage();
-            return null;
+            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch(PDOException $exception) {
+            throw new Exception("Erro na conexão: " . $exception->getMessage());
         }
+
+        return $this->conn;
     }
 }
+?>
