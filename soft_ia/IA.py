@@ -41,6 +41,9 @@ class IA_Incêndios():
         """
         Importa os dados do banco de dados INMET em formato zip
         """
+        # Cria a pasta dados caso nao exista
+        if not os.path.exists(DADOS): os.mkdir(DADOS)
+
         # Inicializa o contador
         contador = 0
         while True:

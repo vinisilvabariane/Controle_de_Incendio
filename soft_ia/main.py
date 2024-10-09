@@ -5,8 +5,10 @@ import datetime as dt
 
 if __name__ == "__main__":
     os.system("cls")
+    
+    print("Hello World")
 
-    ia = IA_Incêndios("Braganca Paulista", range(2019, 2025))
+    ia = IA_Incêndios("Braganca Paulista", range(2023, 2024 + 1))
     ia.impotarDados()
     ia.tratarDados()
     ia.analisarDados()
