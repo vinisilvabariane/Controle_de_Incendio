@@ -1,0 +1,1 @@
+print(ia.preverIncendio(30, 99))

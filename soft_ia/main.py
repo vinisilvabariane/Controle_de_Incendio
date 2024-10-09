@@ -1,12 +1,11 @@
 from IA import IA_Incêndios
 import numpy as np
 import os
-import datetime as dt
+from sql import inserirDados
+import datetime
 
 if __name__ == "__main__":
     os.system("cls")
-    
-    print("Hello World")
 
     ia = IA_Incêndios("Braganca Paulista", range(2023, 2024 + 1))
     ia.impotarDados()
@@ -15,3 +14,5 @@ if __name__ == "__main__":
     ia.converterEmClassificação([0, 2.5, np.inf], ["Baixa Probabilidade", "Alta probabilidade"])
     ia.treinarIa()
     print(ia.preverIncendio(30, 99))
+    inserirDados(99, 30, 0, 0, datetime.datetime.now())
+    print("Dados enviados para o banco")
