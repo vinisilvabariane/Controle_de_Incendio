@@ -9,8 +9,8 @@ const chart1Data = {
   }, {
     label: 'Fumaça',
     data: [800, 600, 100, 200, 400, 750, 900, 1000],
-    backgroundColor: '#333',
-    borderColor: '#333',
+    backgroundColor: 'white',
+    borderColor: 'white',
     borderWidth: 1
   }, {
     label: 'Umidade',
@@ -28,7 +28,7 @@ const chart2Data = {
     data: [2000, 1000, 3000, 6000, 8000, 12000, 16000, 30000, 45000, 48000, 28000, 10000],
     backgroundColor: 'red',
     borderColor: 'red',
-    borderWidth: 1
+    borderWidth: 2
   }]
 };
 
@@ -38,8 +38,17 @@ const chart1 = new Chart(chart1Canvas, {
   data: chart1Data,
   options: {
     scales: {
-      y: {
-        beginAtZero: true
+      x: { // Eixo X definido corretamente
+        beginAtZero: true, // Inicia o eixo a partir de zero
+        ticks: {
+          color: 'white' // Define a cor dos rótulos do eixo x
+        }
+      },
+      y: { // Eixo Y
+        beginAtZero: true,
+        ticks: {
+          color: 'white' // Define a cor dos rótulos do eixo y
+        }
       }
     }
   }
@@ -51,8 +60,17 @@ const chart2 = new Chart(chart2Canvas, {
   data: chart2Data,
   options: {
     scales: {
-      y: {
-        beginAtZero: true
+      x: { // Eixo X definido corretamente
+        beginAtZero: true, // Inicia o eixo a partir de zero
+        ticks: {
+          color: 'white' // Define a cor dos rótulos do eixo x
+        }
+      },
+      y: { // Eixo Y
+        beginAtZero: true,
+        ticks: {
+          color: 'white' // Define a cor dos rótulos do eixo y
+        }
       }
     }
   }
