@@ -1,0 +1,69 @@
+body{
+    font-family: sans-serif;
+    background-color: #2b2828; /* Cor de fundo geral */
+  }
+  .navbar-brand{
+    color:#680000;
+    font-weight: bold;
+    margin-left: 10px;;
+  }
+  footer {
+    margin-top: 100%;
+    padding: 20px;
+    background-color: #680000;
+    color: white;
+    text-align: center;
+    z-index: 2;
+  }
+  nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    font-weight: bold;
+  }
+  
+  nav ul li {
+    margin-left: 80px;
+  
+  }
+  
+  nav ul li a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .custom-navbar {
+    background-color: #444444;
+  }
+  
+  .nav-link {
+    color: white; /* Cor do texto para links */
+  }
+  
+  .nav-link:hover {
+    color: #f0f0f0; /* Cor do texto ao passar o mouse */
+  }
+
+  h2{
+    color: white;
+  }
+  .table {
+    color: white;
+    margin-top: 30px; /* Margem superior para a tabela */
+  }
+  
+  .table th {
+    background-color: #680000; 
+    color: white; /* Cor branca para o texto dos cabeçalhos */
+  }
+  
+  .table td {
+    border: 1px solid #dee2e6; /* Borda sólida para as células */
+    padding: 12px; /* Espaçamento interno das células */
+  }
+  
+  .table th, .table td {
+    text-align: center; /* Alinhamento central para os cabeçalhos e células */
+  }

@@ -5,39 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <title>Menu Principal</title>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .container {
-            flex: 1;
-            text-align: center;
-            margin-top: 50px;
-        }
-        footer {
-            margin-top: auto; /* Faz o footer ir para o final */
-            padding: 20px;
-            background-color: #343a40;
-            color: white;
-            text-align: center; /* Centraliza o texto no footer */
-        }
-    </style>
-</head>
+    <link rel="stylesheet" href="public/css/index.css">
+    <title>FireWatch</title>
+</head> 
 
 <body>
+  
     <div class="container">
-        <h1 style="margin-bottom: 20px; color: #343a40;">Bem-vindo ao Sistema de Prevenção de Incêndios</h1>
-        <p style="margin-bottom: 30px; color: #6c757d;">Selecione uma opção abaixo:</p>
-        <a href="/view/index.php" class="btn btn-primary btn-lg" style="padding: 10px 20px;">Ir para Medidor de Índice</a>
+        <h1 style="margin-bottom: 70px; color: #ffffff;">Bem-vindo ao Sistema de Prevenção de Incêndios</h1>
+        <p style="margin-bottom: 70px;font-size: 25px;">Selecione uma opção abaixo:</p>
+        <a href="view/medidor.php" class="btn btn-custom;" style ="background-color: #680000; color:aliceblue"><img src="img/icons8-gráfico-50.png" style="width: 80px; height: 60px;margin-right: 10px; ">Medidor de Índice</a>
+        <a href="view/tabela.php" class="btn btn-custom" style ="background-color: #680000; color:aliceblue"><img src="img/icons8-inserir-tabela-60.png" style="width: 80px; height: 60px;margin-right: 10px; ">Visualizar Tabela</a>
     </div>
 
     <footer>
-        <p>&copy; 2024 Seu Nome. Todos os direitos reservados.</p>
+        <p>&copy; 2024 FireWatch. Todos os direitos reservados.</p>
     </footer>
+
+
+    <script src='/public/js/graficos.js'></script>
+    <script src='/public/js/requisicao.js'></script>
+    <script src='/public/js/script.js'></script>
 </body>
 
+</html>

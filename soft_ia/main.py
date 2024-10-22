@@ -13,6 +13,5 @@ if __name__ == "__main__":
     ia.analisarDados()
     ia.converterEmClassificação([0, 2.5, np.inf], ["Baixa Probabilidade", "Alta probabilidade"])
     ia.treinarIa()
-    print(ia.preverIncendio(30, 99))
-    inserirDados(99, 30, 0, 0, datetime.datetime.now())
-    print("Dados enviados para o banco")
+    resultado = ia.preverIncendio(30, 99)
+    inserirDados(99, 30, 0, 0, datetime.datetime.now(), resultado)

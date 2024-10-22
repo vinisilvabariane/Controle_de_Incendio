@@ -1,57 +1,46 @@
-body {
+body{
   font-family: sans-serif;
-  background-color: #f8f9fa; /* Cor de fundo geral */
+  background-color: #2b2828; /* Cor de fundo geral */
 }
 
 .container {
-  max-width: 800px; /* Largura máxima do container */
+  max-width: 100%;/* Largura máxima do container */
   margin: 0 auto; /* Centraliza o container */
-  padding: 20px; /* Espaçamento interno */
   background-color: #ffffff; /* Fundo branco */
   border-radius: 8px; /* Bordas arredondadas */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra do container */
+  padding-right: 0;
+
+
 }
 
+.card-header{
+    background-color: #444444; /* Fundo mais escuro para o cabeçalho do card */
+    color: white;
+    width: 80%;
+    font-weight: bold;
+}
 .card {
-  background-color: #fff; /* Cor de fundo do cartão */
+  background-color: #3a3a3a; /* Cor de fundo do cartão */
   border-radius: 8px; /* Bordas arredondadas */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra do cartão */
-  padding: 20px; /* Espaçamento interno do cartão */
-  margin: 10px; /* Margem externa do cartão */
+  padding: 5px; /* Espaçamento interno do cartão */
   flex: 1; /* Flexibilidade do cartão */
+  
+  
 }
 
 .card-title {
-  font-size: 18px; /* Tamanho da fonte do título */
+  font-size: 18px; 
+  color: white;
   font-weight: bold; /* Negrito para o título */
   margin-bottom: 10px; /* Margem inferior do título */
 }
 
-.chart {
-  width: 100%; /* Largura total do gráfico */
-  height: 300px; /* Altura do gráfico */
-}
-
-.legend {
-  display: flex; /* Flexbox para a legenda */
-  margin-top: 10px; /* Margem superior da legenda */
-}
-
-.legend-item {
-  display: flex; /* Flexbox para cada item da legenda */
-  align-items: center; /* Alinhamento vertical */
-  margin-right: 10px; /* Margem à direita */
-}
-
-.legend-color {
-  width: 15px; /* Largura do círculo da legenda */
-  height: 15px; /* Altura do círculo da legenda */
-  border-radius: 50%; /* Círculo */
-  margin-right: 5px; /* Margem à direita do círculo */
-}
 
 .data-label {
-  font-weight: bold; /* Negrito para os rótulos de dados */
+  font-weight: bold;
+  color:white; /* Negrito para os rótulos de dados */
 }
 
 .data-value {
@@ -61,7 +50,7 @@ body {
 /* Estilos para o formulário */
 h2 {
   text-align: center; /* Centraliza o título do formulário */
-  color: #343a40; /* Cor do título */
+  color: #ffffff; /* Cor do título */
 }
 
 .form-group {
@@ -73,23 +62,15 @@ h2 {
   border: 1px solid #ced4da; /* Borda cinza clara */
 }
 
-.btn-primary {
-  background-color: #007bff; /* Cor de fundo do botão */
-  border-color: #007bff; /* Cor da borda do botão */
-}
-
-.btn-primary:hover {
-  background-color: #0056b3; /* Cor de fundo ao passar o mouse */
-  border-color: #0056b3; /* Cor da borda ao passar o mouse */
-}
 
 /* Estilos para a tabela */
 .table {
+  color: white;
   margin-top: 30px; /* Margem superior para a tabela */
 }
 
 .table th {
-  background-color: red; /* Fundo azul para os cabeçalhos */
+  background-color: rgb(37, 21, 21); /* Fundo azul para os cabeçalhos */
   color: white; /* Cor branca para o texto dos cabeçalhos */
 }
 
@@ -100,4 +81,86 @@ h2 {
 
 .table th, .table td {
   text-align: center; /* Alinhamento central para os cabeçalhos e células */
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+nav ul li {
+  margin-left: 80px;
+
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+}
+
+.custom-navbar {
+  background-color: #444444;
+}
+
+.nav-link {
+  color: white; /* Cor do texto para links */
+}
+
+.nav-link:hover {
+  color: #f0f0f0; /* Cor do texto ao passar o mouse */
+}
+
+.navbar-brand{
+  color:#680000;
+  font-weight: bold;
+}
+footer {
+  margin-top: auto;
+  padding: 20px;
+  background-color: #680000;
+  color: white;
+  text-align: center;
+  z-index: 2;
+}
+/* Ajusta o tamanho dos gráficos */
+#chart1, #chart2 {
+  width: 80%;            /* O gráfico ocupa 100% da largura do contêiner pai */
+  max-width: 600px;      /* Define uma largura máxima para os gráficos */
+  height: 270px;         /* Define uma altura fixa para os gráficos */
+  margin: 0 auto;   
+  margin-left: 0; 
+  margin-bottom: 20px;     /* Centraliza o gráfico horizontalmente */
+}
+
+/* Media query para telas menores */
+@media (max-width: 768px) {
+  #chart1, #chart2 {
+      height: 200px;      /* Reduz a altura em telas menores */
+  }
+}
+.custom-card-graph {
+  background-color: #680000; 
+  color: white; 
+}
+
+.custom-card-fire {
+  background-color: #680000; 
+  color: white; 
+}
+
+.position-relative {
+  position: relative; /* Necessário para o posicionamento absoluto da imagem */
+}
+
+.img-overlay {
+  position: absolute; /* Posiciona a imagem acima do conteúdo */
+  top: 10%; /* Ajuste a posição vertical */
+  left: 6%; /* Centraliza horizontalmente */
+  transform: translateX(-50%); /* Centraliza a imagem horizontalmente */
+  width: 40px; /* Ajuste o tamanho da imagem */
+  height: auto; /* Mantém a proporção da imagem */
+  margin-top: -10px;
 }

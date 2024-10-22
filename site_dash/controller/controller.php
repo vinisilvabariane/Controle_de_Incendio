@@ -10,7 +10,7 @@ class Controller {
 
     public function getData(): void {
         try {
-            $data = $this->model->getData(); // Chama o método do Model para buscar os dados
+            $data = $this->model->getData();
             if ($data) {
                 header('Content-Type: application/json');
                 echo json_encode($data);

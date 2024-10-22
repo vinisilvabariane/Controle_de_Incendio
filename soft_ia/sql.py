@@ -3,41 +3,56 @@ import random
 from datetime import datetime
 from variaveis import HOST_DATABASE, USER_DATABASE, DATABASE, PASSWORD_DATABASE
 
-def gerarConexao():
-    # Conectando ao banco de dados MySQL
-    conn = mysql.connector.connect(
-        host=HOST_DATABASE,
-        user=USER_DATABASE,
-        password=PASSWORD_DATABASE,
-        database= DATABASE
-    )
+def gerarConexao() -> mysql.connector.MySQLConnection | None:
+    try:
+        # Conectando ao banco de dados MySQL
+        conn = mysql.connector.connect(
+            host=HOST_DATABASE,
+            user=USER_DATABASE,
+            password=PASSWORD_DATABASE,
+            database=DATABASE
+        )
+        return conn
+    except mysql.connector.Error as err:
+        print(f"Erro na conexão: {err}")
+        return None
 
-    # Inicializa o cursor
-    return conn
-
-def inserirDados(umidade, temperatura, chama, fumaça, data_verificacao):
+def inserirDados(umidade, temperatura, chama, fumaça, data_verificacao, resultado) -> None:
 
     # Cria a conexão
     conn = gerarConexao()
 
-    # Inicializa o cursor
-    cursor = conn.cursor()
+    if conn is None:
+        print("Falha na conexão com o banco de dados.")
+        return
 
-    # SQL para inserção com placeholders para evitar injeção de código
-    sql = """
-    INSERT INTO dados (umidade, temperatura, chama, fumaça, data_verificacao) 
-    VALUES (%s, %s, %s, %s, %s)
-    """
+    try:
+        # Inicializa o cursor
+        cursor = conn.cursor()
 
-    # Executa o insert de forma segura
-    cursor.execute(sql, [umidade, temperatura, chama, fumaça, data_verificacao])
+        # SQL para inserção com placeholders
+        sql = """
+        INSERT INTO dados (umidade, temperatura, chama, fumaça, data_verificacao, resultado) 
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """
 
-    # Confirma as mudanças no banco de dados
-    conn.commit()
+        # Executa o insert de forma segura
+        cursor.execute(sql, [umidade, temperatura, chama, fumaça, data_verificacao, resultado])
 
-    # Fecha a conexão
-    cursor.close()
-    conn.close()
+        # Confirma as mudanças no banco de dados
+        conn.commit()
+
+        print("Dados enviados com sucesso!")
+
+    except mysql.connector.Error as err:
+        print(f"Erro ao executar o SQL: {err}")
+        conn.rollback()  # Desfaz mudanças em caso de erro
+    finally:
+        # Garante que a conexão será fechada
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 if __name__ == "__main__":
     inserirDados(100, 30, 0, 1, "2024-09-03 09:15:00")
