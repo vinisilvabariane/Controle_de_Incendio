@@ -18,7 +18,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php" >Home</a>
+                    <a class="nav-link" href="/index.php" >Home</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="medidor.php">Medidor de Índices</a>
@@ -45,6 +45,7 @@
                     <th>Chama</th>
                     <th>Fumaça</th>
                     <th>Data de Verificação</th>
+                    <th>Resultado</th>
                 </tr>
             </thead>
             <tbody id="dataTableBody">
