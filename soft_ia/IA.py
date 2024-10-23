@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from variaveis import DADOS
 import requests
@@ -107,8 +108,12 @@ class IA_Incêndios():
             # Abrir o arquivo ZIP
             with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
 
-                # Extrair um arquivo específico
-                arquivo_especifico = re.findall(fr'(INMET_.+?_.+?_.+?_{self.estado}_.+?.CSV)', "\n".join(zip_ref.namelist()))[0]  # Substitua pelo nome do arquivo que você deseja extrair
+                # Extrair um arquivo de dados de uma determinada cidade
+                try:
+                    arquivo_especifico = re.search(fr'(INMET_.+?_.+?_.+?_{self.estado}_.+?.CSV)', "\n".join(zip_ref.namelist())).group()  # Substitua pelo nome do arquivo que você deseja extrair
+                except AttributeError:
+                    arquivo_especifico = None
+
                 if arquivo_especifico in zip_ref.namelist():
                     zip_ref.extract(arquivo_especifico, extract_to_directory)
                     print(f"\nArquivo '{arquivo_especifico}' extraído com sucesso!")
@@ -116,12 +121,14 @@ class IA_Incêndios():
                     dadosExtraidos = pd.read_csv(DADOS / arquivo_especifico, delimiter=";", encoding="ISO-8859-1", skiprows=8)
                     self.dados = pd.concat([self.dados, dadosExtraidos])
                 else:
-                    print(f"\nArquivo '{arquivo_especifico}' não encontrado no ZIP.")
+                    print(f"\nArquivo não encontrado no ZIP.")
 
 
             # Remove os dados extras para economizar memória
             # os.remove(DADOS / 'dados.zip')
-            if os.path.exists(DADOS / arquivo_especifico): os.remove(DADOS / arquivo_especifico)
+            
+            # Remove a planilha de dados da cidade
+            if os.path.exists(DADOS / f"{arquivo_especifico}"): os.remove(DADOS / arquivo_especifico)
         print("Dados importados")
 
     def tratarDados(self):
@@ -131,7 +138,8 @@ class IA_Incêndios():
 
         # Verifica se os dados não estão vazios
         if self.dados.empty:
-            raise Exception("Dados não encontrados!\nFavor obter os dados")
+            print("Nenhum dado encontrado!")
+            return
 
         # Converte os dados em seus devidos tipos
         self.dados["Data"] = pd.to_datetime(self.dados["Data"], format="%Y/%m/%d")
@@ -166,6 +174,9 @@ class IA_Incêndios():
         self.dados = self.dados.sample(frac=1, random_state=81681)
 
     def analisarDados(self):
+        if self.dados.empty:
+            print("Nenhum dado encontrado!")
+            return
 
         # Verifica tipagem e quantidade de dados
         print("\nInformações")
@@ -203,8 +214,13 @@ class IA_Incêndios():
         plt.show()
 
     def converterEmClassificação(self, bins, labels):
+
+        if self.dados.empty:
+            print("Nenhum dado encontrado!")
+            return
+
         """
-        Comverte a variável alvo em argumentos para a ia de classificação 
+        Converte a variável alvo em argumentos para a ia de classificação 
         (evita problemas com o coeficiente de person)
         """
         # Classifica a coluna de probabilidade de incêndio
@@ -216,6 +232,10 @@ class IA_Incêndios():
         """
 
         # Separação de dados entre treino e teste
+
+        if self.dados.empty:
+            print("Nenhum dado encontrado!")
+            return
 
         maiorAcuracia = 0
         maiorK = 0
@@ -260,7 +280,10 @@ class IA_Incêndios():
         """
         Gera um resultado referente a probabilidade de incêndio (Alta probabilidade, baixa probabilidade)
         """
-        return self.iaTreinada.predict([[temperatura, umidade]])[0]
+        try:
+            return self.iaTreinada.predict([[temperatura, umidade]])[0]
+        except NotFittedError as error:
+            print("IA não treinada")
 
 
     # Permite que a função seja usada sem a classe estar instanciada

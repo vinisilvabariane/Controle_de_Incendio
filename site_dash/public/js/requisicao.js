@@ -15,6 +15,7 @@ $(document).ready(function() {
                             <td>${item.chama}</td>
                             <td>${item.fumaça}</td>
                             <td>${item.data_verificacao}</td>
+                            <td>${item.resultado}</td>
                         </tr>
                     `;
                     $('#dataTableBody').append(row);
