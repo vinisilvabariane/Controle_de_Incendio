@@ -86,7 +86,6 @@ class IA_Incêndios():
             # Caso houver erro de conexão ele tenta denovo
             except requests.exceptions.ChunkedEncodingError:
                 print("\nOcorreu um erro no download (ChunkedEncodingError).\nTentando Novamente")
-                os.remove(DADOS / f"{contador}.zip")
                 continue
 
             if tamanho_total != 0 and barra_progresso.n != tamanho_total:
@@ -143,13 +142,21 @@ class IA_Incêndios():
 
         # Converte os dados em seus devidos tipos
         self.dados["Data"] = pd.to_datetime(self.dados["Data"], format="%Y/%m/%d")
-        self.dados['Data'] = self.dados['Data'].astype('int64') / 10**9
         self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"] = self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"].str.replace(',', '.').astype(float)
         self.dados["UMIDADE RELATIVA DO AR, HORARIA (%)"] = self.dados["UMIDADE RELATIVA DO AR, HORARIA (%)"].replace(',', '.').astype(float)
         self.dados["TEMPERATURA DO PONTO DE ORVALHO (°C)"] = self.dados["TEMPERATURA DO PONTO DE ORVALHO (°C)"].str.replace(',', '.').astype(float)
         self.dados["PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)"] = self.dados["PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)"].str.replace(',', '.').astype(float)
         self.dados["PRECIPITAÇÃO TOTAL, HORÁRIO (mm)"] = self.dados["PRECIPITAÇÃO TOTAL, HORÁRIO (mm)"].str.replace(',', '.').astype(float)
-        
+
+        # Agrupar por dia e somar a precipitação diária
+        chuva_acumulada_por_dia = self.dados.groupby('Data')['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)'].transform('sum')
+
+        # Substituir os valores de precipitação horária pelos acumulados do dia
+        self.dados['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)'] = chuva_acumulada_por_dia
+
+        # Converter a data para poder ser manuseado as horas
+        self.dados['Data'] = self.dados['Data'].astype('int64') / 10**9
+
         # Filtra dados por hora as 13 da tarde
         self.dados["Hora UTC"] = self.dados["Hora UTC"].str.replace(' UTC', '').astype(int)
         self.dados = self.dados[self.dados["Hora UTC"] == 1300]
@@ -158,14 +165,48 @@ class IA_Incêndios():
         # Elimina colunas desnecessárias
         self.dados = self.dados[[# "Data",
                                  # "Hora UTC",
-                                 # "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)",
+                                 "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)",
                                  "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)",
                                  # "TEMPERATURA DO PONTO DE ORVALHO (°C)",
                                  "UMIDADE RELATIVA DO AR, HORARIA (%)",
                                  # "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)"
                                  ]]
+
         # Adiciona a coluna de probabilidade de incêndio
-        self.dados["Probabilidade Incêndio"] = 0.050*self.dados["UMIDADE RELATIVA DO AR, HORARIA (%)"] - 0.10*(self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]-27)
+        #self.dados["Probabilidade Incêndio"] = 0.050*self.dados["UMIDADE RELATIVA DO AR, HORARIA (%)"] - 0.10*(self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]-27)
+
+        # Calcula o valor de Nesterov
+        valor_anterior = 0
+        self.dados["Probabilidade Incêndio"] = None
+        for index, row in self.dados.iterrows():
+            
+            E = 6.11 * 10 ** ((7.5 * row["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]) / (237.3 + row["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]))
+            d = E*(1-row["UMIDADE RELATIVA DO AR, HORARIA (%)"]/100)
+            dt = d*row["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]
+            G = 0
+
+            # Obtém a precipitação da linha
+            precipitacao = row['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)']
+
+            if precipitacao > 2 and precipitacao <= 5:
+                G = 0.75*valor_anterior + dt
+
+            elif precipitacao > 5 and precipitacao <= 8:
+                G = 0.5*valor_anterior + dt
+
+            elif precipitacao > 8 and precipitacao <= 10:
+                G = dt
+
+            elif precipitacao > 10:
+                G = 0
+            
+            self.dados.at[index, "Probabilidade Incêndio"] = G
+            valor_anterior = G
+        
+        # Converte a coluna da probabilidade em float
+        self.dados["Probabilidade Incêndio"] = self.dados["Probabilidade Incêndio"].replace(',', '.').astype(float)
+
+        self.dados = self.dados.drop('PRECIPITAÇÃO TOTAL, HORÁRIO (mm)', axis=1)
 
         # Retira linhas com células vazias
         self.dados = self.dados.dropna()

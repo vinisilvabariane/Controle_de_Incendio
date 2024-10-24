@@ -11,11 +11,16 @@ umidade = 0
 if __name__ == "__main__":
     os.system("cls")
 
-    ia = IA_Incêndios("Braganca Paulista", range(2023, 2024+1))
+    ia = IA_Incêndios("Braganca Paulista", range(2020, 2024+1))
     ia.impotarDados()
     ia.tratarDados()
     ia.analisarDados()
-    ia.converterEmClassificação([0, 2.5, np.inf], ["Alerta: Alta probabilidade de incêndios!", "Segurança OK"])
+    ia.converterEmClassificação([0, 300, 500, 1000, 4000, np.inf], 
+                                ["Segurança OK", 
+                                 "Baixo Risco de Incêndio", 
+                                 "Médio Risco de Incéndio", 
+                                 "Alerta! Alto risco de incêndio", 
+                                 "ALERTA! Altíssimo risco de incêndio"])
     ia.treinarIa()
     resultado = ia.preverIncendio(temperatura, umidade)
 
