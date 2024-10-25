@@ -3,7 +3,7 @@ class Conexao {
     private $host = 'localhost';
     private $db_name = 'projeto_incendio';
     private $username = 'root';
-    private $password = '123';
+    private $password = '1234';
     private $conn;
 
     public function getConnection() {
