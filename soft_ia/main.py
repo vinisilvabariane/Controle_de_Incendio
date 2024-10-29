@@ -8,6 +8,7 @@ chama = 0
 fumaca = 0
 temperatura = 0
 umidade = 0
+fumacaBool = 0
 import time
 
 if __name__ == "__main__":
@@ -26,13 +27,22 @@ if __name__ == "__main__":
     ia.treinarIa()
 
     while True:
-        dados = obterMsgSerial("COM3")
-        print(dados["Temperatura"])
+        try:
+            dados = obterMsgSerial("COM3")
+        except PermissionError as e:
+            print(e)
+            continue
         resultado = ia.preverIncendio(float(dados["Temperatura"]), float(dados["Umidade"]))
 
         if chama == 1 and fumaca == 1: resultado = "Alerta: Chama e fumaça detectados!"
         elif chama == 1: resultado = "Alerta: Chama detectada!"
         elif float(dados["Fumaça"]) > 1100: resultado = "Alerta: Fumaça detectada!"
 
-        inserirDados(float(dados["Umidade"]), float(dados["Temperatura"]), chama, 1, f"{datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")}", resultado)
-        time.sleep(1000)
+        if(fumaca > 1023):
+            fumacaBool = 1
+        else:
+            fumacaBool = 0
+        
+
+        inserirDados(dados["Umidade"], dados["Temperatura"], chama, fumacaBool, str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")), resultado)
+        time.sleep(10)

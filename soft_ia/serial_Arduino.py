@@ -13,28 +13,12 @@ def obterMsgSerial(porta_serial:str, baud_rate = 9600 ) -> dict[str:float]:
         while True:
             if ser.in_waiting > 0:
                 # Ler a linha recebida do Arduino
-                linha = ser.readline().decode('utf-8').rstrip()
-                fumaca = re.findall(r'Fumaça: (.+)', linha)
-                if fumaca != []:
-                    info["Fumaça"] = fumaca[0]
-                    break
-
-        while True:
-            if ser.in_waiting > 0:
-                # Ler a linha recebida do Arduino
-                linha = ser.readline().decode('utf-8').rstrip()
-                temperatura = re.findall(r'Temperatura: (.+)', linha)
-                if temperatura != []:
-                    info["Temperatura"] = temperatura[0]
-                    break
-
-        while True:
-            if ser.in_waiting > 0:
-                # Ler a linha recebida do Arduino
-                linha = ser.readline().decode('utf-8').rstrip()
-                umidade = re.findall(r'Umidade: (.+)', linha)
-                if umidade != []:
-                    info["Umidade"] = umidade[0]
+                linha = ser.readline().decode('ISO-8859-1').rstrip()
+                infos = re.findall(r'Fumaca:(.+?),Umidade:(.+?),Temperatura:(.+?),+?', linha)[0]
+                if infos != []:
+                    info["Fumaça"] = float(infos[0])
+                    info["Umidade"] = float(infos[1])
+                    info["Temperatura"] = float(infos[2])
                     break
 
         return info
