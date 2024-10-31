@@ -46,15 +46,16 @@
                 </div>
             </div>
 
-            <!-- Estatísticas -->
-            <div class="col-lg-3 col-md-6">
-            <div class="card mb-4 custom-card-graph">
-                    <div class="card-body">
-                    <div class="card-body position-relative"> <!-- Adicione position-relative -->
-                    <img src="/img/fogo.png" class="img-overlay" ></div>
-                        <h5 class="card-title">Incêndios Ocorridos</h5>
-                        <p class="card-text">208.905</p>     
+     <!-- Gráfico de Índices -->
+     <div class="col-lg-6 col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Gráfico de Índices
                     </div>
+                    <div class="card-body">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                   
                 </div>
             </div>
 

@@ -140,6 +140,8 @@ class IA_Incêndios():
             print("Nenhum dado encontrado!")
             return
 
+        self.dados["NESTEROV ANTERIOR"] = None
+
         # Converte os dados em seus devidos tipos
         self.dados["Data"] = pd.to_datetime(self.dados["Data"], format="%Y/%m/%d")
         self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"] = self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"].str.replace(',', '.').astype(float)
@@ -147,6 +149,7 @@ class IA_Incêndios():
         self.dados["TEMPERATURA DO PONTO DE ORVALHO (°C)"] = self.dados["TEMPERATURA DO PONTO DE ORVALHO (°C)"].str.replace(',', '.').astype(float)
         self.dados["PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)"] = self.dados["PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)"].str.replace(',', '.').astype(float)
         self.dados["PRECIPITAÇÃO TOTAL, HORÁRIO (mm)"] = self.dados["PRECIPITAÇÃO TOTAL, HORÁRIO (mm)"].str.replace(',', '.').astype(float)
+        self.dados["NESTEROV ANTERIOR"] = self.dados["NESTEROV ANTERIOR"].replace(',', '.').astype(float)
 
         # Agrupar por dia e somar a precipitação diária
         chuva_acumulada_por_dia = self.dados.groupby('Data')['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)'].transform('sum')
@@ -169,17 +172,24 @@ class IA_Incêndios():
                                  "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)",
                                  # "TEMPERATURA DO PONTO DE ORVALHO (°C)",
                                  "UMIDADE RELATIVA DO AR, HORARIA (%)",
+                                 "NESTEROV ANTERIOR",
                                  # "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)"
                                  ]]
 
         # Adiciona a coluna de probabilidade de incêndio
         #self.dados["Probabilidade Incêndio"] = 0.050*self.dados["UMIDADE RELATIVA DO AR, HORARIA (%)"] - 0.10*(self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]-27)
 
+        # Adiciona uma coluna como ID para manuseio dos dados
+        self.dados['ID'] = range(len(self.dados))
+        self.dados = self.dados.set_index('ID')
+
         # Calcula o valor de Nesterov
-        valor_anterior = 0
+        valor_Nesterov_Anterior = 0
         self.dados["Probabilidade Incêndio"] = None
         for index, row in self.dados.iterrows():
             
+            self.dados.at[index, "NESTEROV ANTERIOR"] = valor_Nesterov_Anterior
+
             E = 6.11 * 10 ** ((7.5 * row["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]) / (237.3 + row["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]))
             d = E*(1-row["UMIDADE RELATIVA DO AR, HORARIA (%)"]/100)
             dt = d*row["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]
@@ -189,10 +199,10 @@ class IA_Incêndios():
             precipitacao = row['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)']
 
             if precipitacao > 2 and precipitacao <= 5:
-                G = 0.75*valor_anterior + dt
+                G = 0.75*valor_Nesterov_Anterior + dt
 
             elif precipitacao > 5 and precipitacao <= 8:
-                G = 0.5*valor_anterior + dt
+                G = 0.5*valor_Nesterov_Anterior + dt
 
             elif precipitacao > 8 and precipitacao <= 10:
                 G = dt
@@ -200,16 +210,27 @@ class IA_Incêndios():
             elif precipitacao > 10:
                 G = 0
             
+            else:
+                G = valor_Nesterov_Anterior + dt
+            
             self.dados.at[index, "Probabilidade Incêndio"] = G
-            valor_anterior = G
+            valor_Nesterov_Anterior = G
         
         # Converte a coluna da probabilidade em float
         self.dados["Probabilidade Incêndio"] = self.dados["Probabilidade Incêndio"].replace(',', '.').astype(float)
 
+        #Remove a precipitação
         self.dados = self.dados.drop('PRECIPITAÇÃO TOTAL, HORÁRIO (mm)', axis=1)
 
         # Retira linhas com células vazias
         self.dados = self.dados.dropna()
+
+        # self.dados["Probabilidade Incêndio - Text"] = pd.cut(self.dados["Probabilidade Incêndio"], bins=[0, 300, 500, 1000, 4000, np.inf], labels=["Segurança OK", 
+        #                         "Baixo Risco de Incêndio", 
+        #                         "Médio Risco de Incéndio", 
+        #                         "Alerta! Alto risco de incêndio", 
+        #                         "ALERTA! Altíssimo risco de incêndio"], include_lowest=True)
+        # self.dados.to_excel("dados.xlsx")
 
         # Embaralhar dados
         self.dados = self.dados.sample(frac=1, random_state=81681)

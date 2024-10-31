@@ -14,10 +14,10 @@ import time
 if __name__ == "__main__":
     os.system("cls")
 
-    ia = IA_Incêndios("Braganca Paulista", range(2020, 2022+1))
+    ia = IA_Incêndios("BRAGANCA PAULISTA", range(2020, 2024+1))
     ia.impotarDados()
     ia.tratarDados()
-    #ia.analisarDados()
+    ia.analisarDados()
     ia.converterEmClassificação([0, 300, 500, 1000, 4000, np.inf], 
                                 ["Segurança OK", 
                                 "Baixo Risco de Incêndio", 
@@ -27,11 +27,22 @@ if __name__ == "__main__":
     ia.treinarIa()
 
     while True:
-        try:
-            dados = obterMsgSerial("COM3")
-        except PermissionError as e:
-            print(e)
-            continue
+        dados = {}
+        dados["Fumaça"] = fumaca
+        dados["Umidade"] = umidade
+        dados["Temperatura"] = temperatura
+
+        # try:
+        #     dados = obterMsgSerial("COM3")
+        # except PermissionError:
+        #     print("Erro de permissão - Arduíno está inacessível\nTentando novamente...")
+        #     time.sleep(1)
+        #     continue
+        # except UnboundLocalError:
+        #     print("Arduíno não pôde ser acessado\nTentando novamente...")
+        #     time.sleep(1)
+        #     continue
+
         resultado = ia.preverIncendio(float(dados["Temperatura"]), float(dados["Umidade"]))
 
         if chama == 1 and fumaca == 1: resultado = "Alerta: Chama e fumaça detectados!"

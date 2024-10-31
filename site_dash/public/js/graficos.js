@@ -21,6 +21,8 @@ const chart1Data = {
   }]
 };
 
+
+
 const chart2Data = {
   labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
   datasets: [{
