@@ -1,7 +1,7 @@
 from IA import IA_Incêndios
 import numpy as np
 import os
-from sql import inserirDados
+from sql import inserirDados, obterUltimoRegistro
 import datetime
 from serial_Arduino import obterMsgSerial
 chama = 0
@@ -42,8 +42,8 @@ if __name__ == "__main__":
         #     print("Arduíno não pôde ser acessado\nTentando novamente...")
         #     time.sleep(1)
         #     continue
-
-        resultado = ia.preverIncendio(float(dados["Temperatura"]), float(dados["Umidade"]))
+        anterior = obterUltimoRegistro()[-1]
+        resultado = ia.preverIncendio(float(dados["Temperatura"]), float(dados["Umidade"]), str(anterior))
 
         if chama == 1 and fumaca == 1: resultado = "Alerta: Chama e fumaça detectados!"
         elif chama == 1: resultado = "Alerta: Chama detectada!"
@@ -53,7 +53,6 @@ if __name__ == "__main__":
             fumacaBool = 1
         else:
             fumacaBool = 0
-        
 
         inserirDados(dados["Umidade"], dados["Temperatura"], chama, fumacaBool, str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")), resultado)
         time.sleep(10)

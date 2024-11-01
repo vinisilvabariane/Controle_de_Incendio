@@ -28,6 +28,7 @@ import time
 class IA_Incêndios():
 
     estado:str
+    nesterovAtual = 0
     anos:list[int] = []
     dados: pd.DataFrame = pd.DataFrame()
     iaTreinada: KNeighborsClassifier = KNeighborsClassifier(n_neighbors=1, weights="distance")
@@ -130,6 +131,7 @@ class IA_Incêndios():
             if os.path.exists(DADOS / f"{arquivo_especifico}"): os.remove(DADOS / arquivo_especifico)
         print("Dados importados")
 
+
     def tratarDados(self):
         """
         Trata os dados para que a IA possa interpretar
@@ -212,7 +214,7 @@ class IA_Incêndios():
             
             else:
                 G = valor_Nesterov_Anterior + dt
-            
+
             self.dados.at[index, "Probabilidade Incêndio"] = G
             valor_Nesterov_Anterior = G
         
@@ -234,6 +236,7 @@ class IA_Incêndios():
 
         # Embaralhar dados
         self.dados = self.dados.sample(frac=1, random_state=81681)
+
 
     def analisarDados(self):
         if self.dados.empty:
@@ -275,16 +278,46 @@ class IA_Incêndios():
         
         plt.show()
 
+    @staticmethod
+    # Função de classificação
+    def classificarNesterov(valor):
+        if valor < 300:
+            return 0
+        elif 300 <= valor <= 500:
+            return 1
+        elif 501 <= valor <= 1000:
+            return 2
+        elif 1001 <= valor <= 4000:
+            return 3
+        else:  # valor > 4000
+            return 4
+
+    @staticmethod
+    def classificarNesterovInverso(mensagem):
+        mapeamento = {
+            "Segurança OK": 0,                # Exemplo: número médio abaixo de 300
+            "Baixo Risco de Incêndio": 1,     # Exemplo: número médio entre 300 e 500
+            "Médio Risco de Incêndio": 2,     # Exemplo: número médio entre 501 e 1000
+            "Alerta! Alto risco de incêndio": 3,  # Exemplo: número médio entre 1001 e 4000
+            "ALERTA! Altíssimo risco de incêndio": 4  # Exemplo: número médio acima de 4000
+        }
+
+        return mapeamento.get(mensagem, "Mensagem não reconhecida")
+
+
     def converterEmClassificação(self, bins, labels):
+        """
+        Converte a variável alvo em argumentos para a ia de classificação 
+        (evita problemas com o coeficiente de person)
+        """
 
         if self.dados.empty:
             print("Nenhum dado encontrado!")
             return
 
-        """
-        Converte a variável alvo em argumentos para a ia de classificação 
-        (evita problemas com o coeficiente de person)
-        """
+        # Converte em números
+        self.dados['NESTEROV ANTERIOR'] = self.dados['NESTEROV ANTERIOR'].apply(self.classificarNesterov)
+
         # Classifica a coluna de probabilidade de incêndio
         self.dados["Probabilidade Incêndio"] = pd.cut(self.dados["Probabilidade Incêndio"], bins=bins, labels=labels, include_lowest=True)
 
@@ -338,12 +371,13 @@ class IA_Incêndios():
                 maiorK = K
         print(f"Ia treinada\nAcuracia Teste K = {maiorK}: {(100*maiorAcuracia):4.1f} %")
 
-    def preverIncendio(self, temperatura, umidade) -> str:
+    def preverIncendio(self, temperatura, umidade, resultadoAnterior) -> str:
         """
         Gera um resultado referente a probabilidade de incêndio (Alta probabilidade, baixa probabilidade)
         """
+        resultadoAnterior = self.classificarNesterovInverso(resultadoAnterior)
         try:
-            return self.iaTreinada.predict([[temperatura, umidade]])[0]
+            return self.iaTreinada.predict([[temperatura, umidade, 0]])[0]
         except NotFittedError as error:
             print("IA não treinada")
 
