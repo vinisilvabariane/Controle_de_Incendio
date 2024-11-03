@@ -4,6 +4,7 @@ import os
 from sql import inserirDados, obterUltimoRegistro
 import datetime
 from serial_Arduino import obterMsgSerial
+serial = "COM6"
 chama = 0
 fumaca = 0
 temperatura = 0
@@ -28,31 +29,31 @@ if __name__ == "__main__":
 
     while True:
         dados = {}
-        dados["Fumaça"] = fumaca
-        dados["Umidade"] = umidade
-        dados["Temperatura"] = temperatura
+        # dados["Fumaça"] = fumaca
+        # dados["Umidade"] = umidade
+        # dados["Temperatura"] = temperatura
 
-        # try:
-        #     dados = obterMsgSerial("COM3")
-        # except PermissionError:
-        #     print("Erro de permissão - Arduíno está inacessível\nTentando novamente...")
-        #     time.sleep(1)
-        #     continue
-        # except UnboundLocalError:
-        #     print("Arduíno não pôde ser acessado\nTentando novamente...")
-        #     time.sleep(1)
-        #     continue
+        try:
+            dados = obterMsgSerial(serial)
+        except PermissionError:
+            print("Erro de permissão - Arduíno está inacessível\nTentando novamente...")
+            time.sleep(1)
+            continue
+        except UnboundLocalError:
+            print("Arduíno não pôde ser acessado\nTentando novamente...")
+            time.sleep(1)
+            continue
         anterior = obterUltimoRegistro()[-1]
-        resultado = ia.preverIncendio(float(dados["Temperatura"]), float(dados["Umidade"]), str(anterior))
+        resultado = ia.preverIncendio(float(dados["Temperatura"]), dados["Umidade"], anterior)
 
         if chama == 1 and fumaca == 1: resultado = "Alerta: Chama e fumaça detectados!"
         elif chama == 1: resultado = "Alerta: Chama detectada!"
         elif float(dados["Fumaça"]) > 1100: resultado = "Alerta: Fumaça detectada!"
 
-        if(fumaca > 1023):
+        if(dados["Fumaça"] >= 1023):
             fumacaBool = 1
         else:
             fumacaBool = 0
 
-        inserirDados(dados["Umidade"], dados["Temperatura"], chama, fumacaBool, str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")), resultado)
-        time.sleep(10)
+        inserirDados(dados["Umidade"], dados["Temperatura"], dados["Chama"], fumacaBool, str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")), resultado)
+        time.sleep(1)
