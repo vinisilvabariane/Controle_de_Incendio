@@ -18,7 +18,6 @@ def gerarConexao() -> mysql.connector.MySQLConnection | None:
         return None
 
 def inserirDados(umidade, temperatura, chama, fumaça, data_verificacao, resultado) -> None:
-
     # Cria a conexão
     conn = gerarConexao()
 
@@ -54,5 +53,41 @@ def inserirDados(umidade, temperatura, chama, fumaça, data_verificacao, resulta
         if conn:
             conn.close()
 
+def obterUltimoRegistro() -> tuple:
+    conn = gerarConexao()
+
+    if conn is None:
+        print("Falha na conexão com o banco de dados.")
+        return
+
+    try:
+        cursor = conn.cursor()
+
+        # SQL para obter o último registro com a data de verificação inferior a 1 dia
+        sql = """
+        SELECT *
+        FROM dados 
+        WHERE STR_TO_DATE(data_verificacao, '%d/%m/%Y %H:%i:%s') < NOW() - INTERVAL 1 DAY
+        ORDER BY STR_TO_DATE(data_verificacao, '%d/%m/%Y %H:%i:%s') DESC
+        LIMIT 1
+        """
+
+        cursor.execute(sql)
+        resultado = cursor.fetchone()
+
+        if resultado:
+            return resultado
+        else:
+            return (0, 0, 0, 0, 0, 0, 0)
+
+    except mysql.connector.Error as err:
+        print(f"Erro ao executar a consulta: {err}")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 if __name__ == "__main__":
-    inserirDados(100, 30, 0, 1, "2024-09-03 09:15:00")
+    inserirDados(100, 30, 0, 1, "31/10/2024 14:50:23", 200, "Baixo Risco de Incêndio")
+    print(obterUltimoRegistro())

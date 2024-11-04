@@ -2,82 +2,148 @@
 #include <PID_v1.h>
 
 // Definindo as portas dos sensores
-#define FLAME_SENSOR_PIN 2 // Sensor de chama na porta 2 (digital)
-#define SMOKE_SENSOR_PIN A0 // Sensor de fumaça na porta A0 (analógico)
-#define DHTPIN 3 // Sensor DHT na porta 3
-#define PUMP_PIN 3 // Bomba de água controlada pela porta PWM
+#define pinSensorChama 2   // Sensor de chama na porta 2 (digital)
+#define pinSensorFumaca A0  // Sensor de fumaça na porta A0 (analógico)
+#define pinBombaDeAgua 3    // Bomba de água controlada pela porta PWM
+#define pinDHT 4            // Sensor DHT na porta 5
 
 // Definindo o tipo do sensor DHT
-#define DHTTYPE DHT11   // DHT 11 ou DHT22, dependendo do seu modelo
-
-DHT dht(DHTPIN, DHTTYPE);
+#define DHTTYPE DHT22       // DHT 11 ou DHT22, dependendo do seu modelo
+DHT dht(pinDHT, DHTTYPE);
 
 // Variáveis para controle PID
 double Setpoint, Input, Output;
 
 // Definindo os parâmetros do PID: Kp, Ki, Kd
-double Kp = 2, Ki = 5, Kd = 1; 
+double Kp = 30, Ki = 10, Kd = 0;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
+// Configuração da média móvel para três variáveis independentes
+const int numLeituras = 3; // Define o número de leituras para o cálculo da média móvel
+
+// Variáveis para a média móvel do sensor de fumaça
+float leiturasFumaca[numLeituras] = {0};
+int indiceLeituraFumaca = 0;
+float somaFumaca = 0;
+
+// Variáveis para a média móvel de umidade
+float leiturasUmidade[numLeituras] = {0};
+int indiceLeituraUmidade = 0;
+float somaUmidade = 0;
+
+// Variáveis para a média móvel de temperatura
+float leiturasTemperatura[numLeituras] = {0};
+int indiceLeituraTemperatura = 0;
+float somaTemperatura = 0;
+
 // Variáveis para leitura dos sensores
-int flameStatus;
-int smokeLevel;
-float humidity;
-float temperature;
+int statusChama;
+float nivelFumaca;
+float umidade;
+float temperatura;
 
 void setup() {
   Serial.begin(9600);
-  
-  // Inicializa o sensor DHT
+
+  // LÊ os sensores para pré-calcular a média móvel
+  lerSensores();
+  lerSensores();
+  lerSensores();
+
+  // Inicializa os sensores
   dht.begin();
-  
-  // Inicializa o sensor de chama
-  pinMode(FLAME_SENSOR_PIN, INPUT);
-  
-  // Inicializa o pino da bomba de água
-  pinMode(PUMP_PIN, OUTPUT);
-  
+  pinMode(pinSensorChama, INPUT);
+  pinMode(pinBombaDeAgua, OUTPUT);
+  pinMode(pinSensorFumaca, INPUT);
+
   // Definindo o setpoint de controle
-  Setpoint = 50; // Umidade ideal de 50% (ajustável conforme necessidade)
+  Setpoint = 30;  // Umidade ideal de 30% (ajustável conforme necessidade)
 
   // Inicializa o PID
   myPID.SetMode(AUTOMATIC);
 }
 
 void loop() {
+  lerSensores();
+  exibirDadosSerial();
+  controlePID();
+  delay(200);
+}
+
+// Função de média móvel para o sensor de fumaça
+float calculaMediaMovelFumaca(float novaLeitura) {
+  somaFumaca -= leiturasFumaca[indiceLeituraFumaca];
+  leiturasFumaca[indiceLeituraFumaca] = novaLeitura;
+  somaFumaca += novaLeitura;
+  indiceLeituraFumaca = (indiceLeituraFumaca + 1) % numLeituras;
+  return somaFumaca / numLeituras;
+}
+
+// Função de média móvel para a umidade
+float calculaMediaMovelUmidade(float novaLeitura) {
+  somaUmidade -= leiturasUmidade[indiceLeituraUmidade];
+  leiturasUmidade[indiceLeituraUmidade] = novaLeitura;
+  somaUmidade += novaLeitura;
+  indiceLeituraUmidade = (indiceLeituraUmidade + 1) % numLeituras;
+  return somaUmidade / numLeituras;
+}
+
+// Função de média móvel para a temperatura
+float calculaMediaMovelTemperatura(float novaLeitura) {
+  somaTemperatura -= leiturasTemperatura[indiceLeituraTemperatura];
+  leiturasTemperatura[indiceLeituraTemperatura] = novaLeitura;
+  somaTemperatura += novaLeitura;
+  indiceLeituraTemperatura = (indiceLeituraTemperatura + 1) % numLeituras;
+  return somaTemperatura / numLeituras;
+}
+
+void lerSensores() {
   // Leitura dos sensores
-  flameStatus = digitalRead(FLAME_SENSOR_PIN); // 0 ou 1 (chama detectada ou não)
-  smokeLevel = analogRead(SMOKE_SENSOR_PIN);   // Leitura analógica de concentração de fumaça (0 a 1023)
-  humidity = dht.readHumidity();               // Leitura de umidade do sensor DHT
-  temperature = dht.readTemperature();         // Leitura de temperatura do sensor DHT
-  
+  statusChama = digitalRead(pinSensorChama);  // 0 ou 1 (chama detectada ou não)
+  nivelFumaca = calculaMediaMovelFumaca((float)analogRead(pinSensorFumaca)); // Média móvel da fumaça
+  umidade = calculaMediaMovelUmidade(dht.readHumidity());                   // Média móvel da umidade
+  temperatura = calculaMediaMovelTemperatura(dht.readTemperature());        // Média móvel da temperatura
+
   // Verifica se houve erro na leitura do DHT
-  if (isnan(humidity) || isnan(temperature)) {
-    Serial.println("Erro na leitura do sensor DHT!");
-    return;
+  if (isnan(umidade) || isnan(temperatura)) {
+    Serial.println("Erro ao ler o sensor DHT!");  // Mensagem de erro
+    umidade = 0;
+    temperatura = 0;
   }
-  
-  // Exibe as leituras dos sensores
-  Serial.print("Fumaça: ");
-  Serial.println(smokeLevel);
-  Serial.print("Umidade: ");
-  Serial.println(humidity);
-  Serial.print("Temperatura: ");
-  Serial.println(temperature);
-  
-  // Entrada para o PID é a umidade atual (pode-se combinar temperatura se necessário)
-  Input = humidity;
-  
+}
+
+void controlePID() {
+  // Entrada para o PID é a temperatura atual
+  Input = temperatura;
+
   // Caso haja chama detectada, acionar bomba no máximo
-  if (flameStatus == 1) {
-    analogWrite(PUMP_PIN, 255); // Ativar bomba em potência máxima (PWM 255)
-    Serial.println("Chama detectada! Bomba ativada no máximo!");
+  if (statusChama == 0) {
+    analogWrite(pinBombaDeAgua, 255);  // Ativar bomba em potência máxima (PWM 255)
   } else {
     // Caso não haja chama, controlar bomba com PID
     myPID.Compute();
-    analogWrite(PUMP_PIN, Output); // Saída do PID ajusta o PWM da bomba
+    Output = constrain(Output, 0, 255);      // Garante que o valor esteja entre 0 e 255
+    analogWrite(pinBombaDeAgua, Output);     // Saída do PID ajusta o PWM da bomba
   }
-  
-  // Tempo de atualização (delay)
-  delay(1000);
+}
+
+void exibirDadosSerial() {
+  // Exibe as leituras dos sensores
+  Serial.print("Fumaca:");
+  Serial.print(nivelFumaca);
+  Serial.print(",");
+  Serial.print("Umidade:");
+  Serial.print(umidade);
+  Serial.print(",");
+  Serial.print("Temperatura:");
+  Serial.print(temperatura);
+  Serial.print(",");
+  Serial.print("Chama:");
+  Serial.print(statusChama);
+  Serial.print(",");
+  Serial.print("Entrada:");
+  Serial.print(Input);
+  Serial.print(",");
+  Serial.print("Saida:");
+  Serial.println(Output);
 }

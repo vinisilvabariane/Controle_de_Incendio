@@ -10,7 +10,7 @@ CREATE TABLE dados (
     temperatura DECIMAL(5,2),
     chama BOOLEAN,
     fumaça BOOLEAN,
-    data_verificacao DATETIME,
+    data_verificacao TEXT,
     resultado TEXT NOT NULL
 );
 

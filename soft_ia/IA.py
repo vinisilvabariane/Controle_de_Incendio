@@ -28,6 +28,7 @@ import time
 class IA_Incêndios():
 
     estado:str
+    nesterovAtual = 0
     anos:list[int] = []
     dados: pd.DataFrame = pd.DataFrame()
     iaTreinada: KNeighborsClassifier = KNeighborsClassifier(n_neighbors=1, weights="distance")
@@ -86,7 +87,6 @@ class IA_Incêndios():
             # Caso houver erro de conexão ele tenta denovo
             except requests.exceptions.ChunkedEncodingError:
                 print("\nOcorreu um erro no download (ChunkedEncodingError).\nTentando Novamente")
-                os.remove(DADOS / f"{contador}.zip")
                 continue
 
             if tamanho_total != 0 and barra_progresso.n != tamanho_total:
@@ -131,6 +131,7 @@ class IA_Incêndios():
             if os.path.exists(DADOS / f"{arquivo_especifico}"): os.remove(DADOS / arquivo_especifico)
         print("Dados importados")
 
+
     def tratarDados(self):
         """
         Trata os dados para que a IA possa interpretar
@@ -141,15 +142,26 @@ class IA_Incêndios():
             print("Nenhum dado encontrado!")
             return
 
+        self.dados["NESTEROV ANTERIOR"] = None
+
         # Converte os dados em seus devidos tipos
         self.dados["Data"] = pd.to_datetime(self.dados["Data"], format="%Y/%m/%d")
-        self.dados['Data'] = self.dados['Data'].astype('int64') / 10**9
         self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"] = self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"].str.replace(',', '.').astype(float)
         self.dados["UMIDADE RELATIVA DO AR, HORARIA (%)"] = self.dados["UMIDADE RELATIVA DO AR, HORARIA (%)"].replace(',', '.').astype(float)
         self.dados["TEMPERATURA DO PONTO DE ORVALHO (°C)"] = self.dados["TEMPERATURA DO PONTO DE ORVALHO (°C)"].str.replace(',', '.').astype(float)
         self.dados["PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)"] = self.dados["PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)"].str.replace(',', '.').astype(float)
         self.dados["PRECIPITAÇÃO TOTAL, HORÁRIO (mm)"] = self.dados["PRECIPITAÇÃO TOTAL, HORÁRIO (mm)"].str.replace(',', '.').astype(float)
-        
+        self.dados["NESTEROV ANTERIOR"] = self.dados["NESTEROV ANTERIOR"].replace(',', '.').astype(float)
+
+        # Agrupar por dia e somar a precipitação diária
+        chuva_acumulada_por_dia = self.dados.groupby('Data')['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)'].transform('sum')
+
+        # Substituir os valores de precipitação horária pelos acumulados do dia
+        self.dados['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)'] = chuva_acumulada_por_dia
+
+        # Converter a data para poder ser manuseado as horas
+        self.dados['Data'] = self.dados['Data'].astype('int64') / 10**9
+
         # Filtra dados por hora as 13 da tarde
         self.dados["Hora UTC"] = self.dados["Hora UTC"].str.replace(' UTC', '').astype(int)
         self.dados = self.dados[self.dados["Hora UTC"] == 1300]
@@ -158,20 +170,73 @@ class IA_Incêndios():
         # Elimina colunas desnecessárias
         self.dados = self.dados[[# "Data",
                                  # "Hora UTC",
-                                 # "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)",
+                                 "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)",
                                  "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)",
                                  # "TEMPERATURA DO PONTO DE ORVALHO (°C)",
                                  "UMIDADE RELATIVA DO AR, HORARIA (%)",
+                                 "NESTEROV ANTERIOR",
                                  # "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)"
                                  ]]
+
         # Adiciona a coluna de probabilidade de incêndio
-        self.dados["Probabilidade Incêndio"] = 0.050*self.dados["UMIDADE RELATIVA DO AR, HORARIA (%)"] - 0.10*(self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]-27)
+        #self.dados["Probabilidade Incêndio"] = 0.050*self.dados["UMIDADE RELATIVA DO AR, HORARIA (%)"] - 0.10*(self.dados["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]-27)
+
+        # Adiciona uma coluna como ID para manuseio dos dados
+        self.dados['ID'] = range(len(self.dados))
+        self.dados = self.dados.set_index('ID')
+
+        # Calcula o valor de Nesterov
+        valor_Nesterov_Anterior = 0
+        self.dados["Probabilidade Incêndio"] = None
+        for index, row in self.dados.iterrows():
+            
+            self.dados.at[index, "NESTEROV ANTERIOR"] = valor_Nesterov_Anterior
+
+            E = 6.11 * 10 ** ((7.5 * row["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]) / (237.3 + row["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]))
+            d = E*(1-row["UMIDADE RELATIVA DO AR, HORARIA (%)"]/100)
+            dt = d*row["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]
+            G = 0
+
+            # Obtém a precipitação da linha
+            precipitacao = row['PRECIPITAÇÃO TOTAL, HORÁRIO (mm)']
+
+            if precipitacao > 2 and precipitacao <= 5:
+                G = 0.75*valor_Nesterov_Anterior + dt
+
+            elif precipitacao > 5 and precipitacao <= 8:
+                G = 0.5*valor_Nesterov_Anterior + dt
+
+            elif precipitacao > 8 and precipitacao <= 10:
+                G = dt
+
+            elif precipitacao > 10:
+                G = 0
+            
+            else:
+                G = valor_Nesterov_Anterior + dt
+
+            self.dados.at[index, "Probabilidade Incêndio"] = G
+            valor_Nesterov_Anterior = G
+        
+        # Converte a coluna da probabilidade em float
+        self.dados["Probabilidade Incêndio"] = self.dados["Probabilidade Incêndio"].replace(',', '.').astype(float)
+
+        #Remove a precipitação
+        self.dados = self.dados.drop('PRECIPITAÇÃO TOTAL, HORÁRIO (mm)', axis=1)
 
         # Retira linhas com células vazias
         self.dados = self.dados.dropna()
 
+        # self.dados["Probabilidade Incêndio - Text"] = pd.cut(self.dados["Probabilidade Incêndio"], bins=[0, 300, 500, 1000, 4000, np.inf], labels=["Segurança OK", 
+        #                         "Baixo Risco de Incêndio", 
+        #                         "Médio Risco de Incéndio", 
+        #                         "Alerta! Alto risco de incêndio", 
+        #                         "ALERTA! Altíssimo risco de incêndio"], include_lowest=True)
+        # self.dados.to_excel("dados.xlsx")
+
         # Embaralhar dados
         self.dados = self.dados.sample(frac=1, random_state=81681)
+
 
     def analisarDados(self):
         if self.dados.empty:
@@ -213,16 +278,46 @@ class IA_Incêndios():
         
         plt.show()
 
+    @staticmethod
+    # Função de classificação
+    def classificarNesterov(valor):
+        if valor < 300:
+            return 0
+        elif 300 <= valor <= 500:
+            return 1
+        elif 501 <= valor <= 1000:
+            return 2
+        elif 1001 <= valor <= 4000:
+            return 3
+        else:  # valor > 4000
+            return 4
+
+    @staticmethod
+    def classificarNesterovInverso(mensagem):
+        mapeamento = {
+            "Segurança OK": 0,                # Exemplo: número médio abaixo de 300
+            "Baixo Risco de Incêndio": 1,     # Exemplo: número médio entre 300 e 500
+            "Médio Risco de Incêndio": 2,     # Exemplo: número médio entre 501 e 1000
+            "Alerta! Alto risco de incêndio": 3,  # Exemplo: número médio entre 1001 e 4000
+            "ALERTA! Altíssimo risco de incêndio": 4  # Exemplo: número médio acima de 4000
+        }
+
+        return mapeamento.get(mensagem, "Mensagem não reconhecida")
+
+
     def converterEmClassificação(self, bins, labels):
+        """
+        Converte a variável alvo em argumentos para a ia de classificação 
+        (evita problemas com o coeficiente de person)
+        """
 
         if self.dados.empty:
             print("Nenhum dado encontrado!")
             return
 
-        """
-        Converte a variável alvo em argumentos para a ia de classificação 
-        (evita problemas com o coeficiente de person)
-        """
+        # Converte em números
+        self.dados['NESTEROV ANTERIOR'] = self.dados['NESTEROV ANTERIOR'].apply(self.classificarNesterov)
+
         # Classifica a coluna de probabilidade de incêndio
         self.dados["Probabilidade Incêndio"] = pd.cut(self.dados["Probabilidade Incêndio"], bins=bins, labels=labels, include_lowest=True)
 
@@ -276,12 +371,13 @@ class IA_Incêndios():
                 maiorK = K
         print(f"Ia treinada\nAcuracia Teste K = {maiorK}: {(100*maiorAcuracia):4.1f} %")
 
-    def preverIncendio(self, temperatura, umidade) -> str:
+    def preverIncendio(self, temperatura, umidade, resultadoAnterior) -> str:
         """
         Gera um resultado referente a probabilidade de incêndio (Alta probabilidade, baixa probabilidade)
         """
+        resultadoAnterior = self.classificarNesterovInverso(resultadoAnterior)
         try:
-            return self.iaTreinada.predict([[temperatura, umidade]])[0]
+            return self.iaTreinada.predict([[temperatura, umidade, 0]])[0]
         except NotFittedError as error:
             print("IA não treinada")
 
