@@ -11,7 +11,7 @@ class Model {
 
     public function getData(): ?array {
         try {
-            $query = "SELECT idDados, umidade, temperatura, chama, fumaça, data_verificacao, resultado FROM dados";
+            $query = "SELECT idDados, umidade, temperatura, chama, fumaça, data_verificacao, resultado FROM dados ORDER BY idDados DESC;";
             $stmt = $this->pdo->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

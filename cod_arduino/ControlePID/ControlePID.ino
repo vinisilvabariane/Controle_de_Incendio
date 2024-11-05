@@ -3,12 +3,12 @@
 
 // Definindo as portas dos sensores
 #define pinSensorChama 2   // Sensor de chama na porta 2 (digital)
-#define pinSensorFumaca A0  // Sensor de fumaça na porta A0 (analógico)
-#define pinBombaDeAgua 3    // Bomba de água controlada pela porta PWM
-#define pinDHT 4            // Sensor DHT na porta 5
+#define pinSensorFumaca A0 // Sensor de fumaça na porta A0 (analógico)
+#define pinBombaDeAgua 3   // Bomba de água controlada pela porta PWM
+#define pinDHT A1          // Sensor DHT na porta A1
 
 // Definindo o tipo do sensor DHT
-#define DHTTYPE DHT22       // DHT 11 ou DHT22, dependendo do seu modelo
+#define DHTTYPE DHT22      // DHT11 ou DHT22, dependendo do seu modelo
 DHT dht(pinDHT, DHTTYPE);
 
 // Variáveis para controle PID
@@ -45,16 +45,15 @@ float temperatura;
 void setup() {
   Serial.begin(9600);
 
-  // LÊ os sensores para pré-calcular a média móvel
-  lerSensores();
-  lerSensores();
-  lerSensores();
-
   // Inicializa os sensores
   dht.begin();
   pinMode(pinSensorChama, INPUT);
   pinMode(pinBombaDeAgua, OUTPUT);
   pinMode(pinSensorFumaca, INPUT);
+
+  lerSensores();
+  lerSensores();
+  lerSensores();
 
   // Definindo o setpoint de controle
   Setpoint = 30;  // Umidade ideal de 30% (ajustável conforme necessidade)
@@ -101,15 +100,21 @@ void lerSensores() {
   // Leitura dos sensores
   statusChama = digitalRead(pinSensorChama);  // 0 ou 1 (chama detectada ou não)
   nivelFumaca = calculaMediaMovelFumaca((float)analogRead(pinSensorFumaca)); // Média móvel da fumaça
-  umidade = calculaMediaMovelUmidade(dht.readHumidity());                   // Média móvel da umidade
-  temperatura = calculaMediaMovelTemperatura(dht.readTemperature());        // Média móvel da temperatura
+  
+  // Leitura da umidade e temperatura com média móvel
+  umidade = dht.readHumidity();
+  temperatura = dht.readTemperature();
 
   // Verifica se houve erro na leitura do DHT
-  if (isnan(umidade) || isnan(temperatura)) {
-    Serial.println("Erro ao ler o sensor DHT!");  // Mensagem de erro
+  if (isnan(umidade)) {
     umidade = 0;
+    
+  }
+  if(isnan(temperatura)){
     temperatura = 0;
   }
+  umidade = calculaMediaMovelUmidade(umidade);
+  temperatura = calculaMediaMovelTemperatura(temperatura);
 }
 
 void controlePID() {
@@ -123,6 +128,8 @@ void controlePID() {
     // Caso não haja chama, controlar bomba com PID
     myPID.Compute();
     Output = constrain(Output, 0, 255);      // Garante que o valor esteja entre 0 e 255
+    if(Output<154) Output = 0;
+
     analogWrite(pinBombaDeAgua, Output);     // Saída do PID ajusta o PWM da bomba
   }
 }

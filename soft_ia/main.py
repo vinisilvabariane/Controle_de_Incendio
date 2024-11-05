@@ -1,10 +1,10 @@
 from IA import IA_Incêndios
 import numpy as np
+from variaveis import PORTA_ARDUINO
 import os
 from sql import inserirDados, obterUltimoRegistro
 import datetime
 from serial_Arduino import obterMsgSerial
-serial = "COM6"
 chama = 0
 fumaca = 0
 temperatura = 0
@@ -34,7 +34,7 @@ if __name__ == "__main__":
         # dados["Temperatura"] = temperatura
 
         try:
-            dados = obterMsgSerial(serial)
+            dados = obterMsgSerial(PORTA_ARDUINO)
         except PermissionError:
             print("Erro de permissão - Arduíno está inacessível\nTentando novamente...")
             time.sleep(1)
@@ -43,7 +43,11 @@ if __name__ == "__main__":
             print("Arduíno não pôde ser acessado\nTentando novamente...")
             time.sleep(1)
             continue
-        anterior = obterUltimoRegistro()[-1]
+        try:
+            anterior = obterUltimoRegistro()[-1]
+        except TypeError:
+            time.sleep(1)
+            continue
         resultado = ia.preverIncendio(float(dados["Temperatura"]), dados["Umidade"], anterior)
 
         if chama == 1 and fumaca == 1: resultado = "Alerta: Chama e fumaça detectados!"
