@@ -15,16 +15,16 @@ import time
 if __name__ == "__main__":
     os.system("cls")
 
-    ia = IA_Incêndios("BRAGANCA PAULISTA", range(2020, 2024+1))
+    ia = IA_Incêndios("SAO PAULO - INTERLAGOS", range(2020, 2024+1))
     ia.impotarDados()
     ia.tratarDados()
     ia.analisarDados()
-    ia.converterEmClassificação([0, 300, 500, 1000, 4000, np.inf], 
-                                ["Segurança OK", 
-                                "Baixo Risco de Incêndio", 
-                                "Médio Risco de Incéndio", 
-                                "Alerta! Alto risco de incêndio", 
-                                "ALERTA! Altíssimo risco de incêndio"])
+    ia.converterEmClassificação([0, 1, 1.5, 2, 2.5, np.inf], 
+                                ["ALERTA! Altíssimo risco de incêndio", 
+                                "Alerta! Alto risco de incêndio",
+                                "Médio Risco de Incêndio",
+                                "Baixo Risco de Incêndio",
+                                "Sem Risco de Incêndio"])
     ia.treinarIa()
 
     while True:
@@ -43,12 +43,13 @@ if __name__ == "__main__":
             print("Arduíno não pôde ser acessado\nTentando novamente...")
             time.sleep(1)
             continue
-        try:
-            anterior = obterUltimoRegistro()[-1]
-        except TypeError:
-            time.sleep(1)
-            continue
-        resultado = ia.preverIncendio(float(dados["Temperatura"]), dados["Umidade"], anterior)
+        # try:
+        #     anterior = obterUltimoRegistro()[-1]
+        # except TypeError:
+        #     time.sleep(1)
+        #     continue
+        
+        resultado = ia.preverIncendio(float(dados["Temperatura"]), dados["Umidade"])
 
         if chama == 1 and fumaca == 1: resultado = "Alerta: Chama e fumaça detectados!"
         elif chama == 1: resultado = "Alerta: Chama detectada!"

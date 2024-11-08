@@ -16,7 +16,7 @@ double Setpoint, Input, Output;
 
 // Definindo os parâmetros do PID: Kp, Ki, Kd
 double Kp = 30, Ki = 10, Kd = 0;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, REVERSE);
 
 // Configuração da média móvel para três variáveis independentes
 const int numLeituras = 3; // Define o número de leituras para o cálculo da média móvel
@@ -56,7 +56,7 @@ void setup() {
   lerSensores();
 
   // Definindo o setpoint de controle
-  Setpoint = 30;  // Umidade ideal de 30% (ajustável conforme necessidade)
+  Setpoint = 25;  // Umidade ideal de 30% (ajustável conforme necessidade)
 
   // Inicializa o PID
   myPID.SetMode(AUTOMATIC);
@@ -98,7 +98,7 @@ float calculaMediaMovelTemperatura(float novaLeitura) {
 
 void lerSensores() {
   // Leitura dos sensores
-  statusChama = digitalRead(pinSensorChama);  // 0 ou 1 (chama detectada ou não)
+  statusChama = !digitalRead(pinSensorChama);  // 0 ou 1 (chama detectada ou não)
   nivelFumaca = calculaMediaMovelFumaca((float)analogRead(pinSensorFumaca)); // Média móvel da fumaça
   
   // Leitura da umidade e temperatura com média móvel
@@ -122,16 +122,18 @@ void controlePID() {
   Input = temperatura;
 
   // Caso haja chama detectada, acionar bomba no máximo
-  if (statusChama == 0) {
+  if (statusChama == 1) {
     analogWrite(pinBombaDeAgua, 255);  // Ativar bomba em potência máxima (PWM 255)
-  } else {
-    // Caso não haja chama, controlar bomba com PID
-    myPID.Compute();
-    Output = constrain(Output, 0, 255);      // Garante que o valor esteja entre 0 e 255
-    if(Output<154) Output = 0;
+    Output = 255;
+  }else{
+  // Caso não haja chama, controlar bomba com PID
+  myPID.Compute();
+  Output = constrain(Output, 0, 255);      // Garante que o valor esteja entre 0 e 255
+  if(Output<155) Output = 0;
 
-    analogWrite(pinBombaDeAgua, Output);     // Saída do PID ajusta o PWM da bomba
+  analogWrite(pinBombaDeAgua, Output);     // Saída do PID ajusta o PWM da bomba
   }
+
 }
 
 void exibirDadosSerial() {
@@ -150,6 +152,9 @@ void exibirDadosSerial() {
   Serial.print(",");
   Serial.print("Entrada:");
   Serial.print(Input);
+  Serial.print(",");
+  Serial.print("Setpoint:");
+  Serial.print(Setpoint);
   Serial.print(",");
   Serial.print("Saida:");
   Serial.println(Output);
