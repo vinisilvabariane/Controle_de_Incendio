@@ -1,9 +1,13 @@
-$(document).ready(function() {
+$(document).ready(function () {
+    setInterval(requisicao, 5000);
+});
+
+function requisicao() {
     $.ajax({
         url: '/router/router.php?action=getData',
         method: 'GET',
         dataType: 'json',
-        success: function(data) {
+        success: function (data) {
             if (data.length > 0) {
                 $('#dataTableBody').empty();
                 data.forEach(item => {
@@ -24,8 +28,8 @@ $(document).ready(function() {
                 $('#dataTableBody').html('<tr><td colspan="6">Nenhum dado encontrado</td></tr>');
             }
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error('Erro ao carregar dados:', error);
         }
-    });
-});
+    })
+}
