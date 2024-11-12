@@ -41,7 +41,6 @@ def inserirDados(umidade, temperatura, chama, fumaça, data_verificacao, resulta
         # Confirma as mudanças no banco de dados
         conn.commit()
 
-        print("Dados enviados com sucesso!")
 
     except mysql.connector.Error as err:
         print(f"Erro ao executar o SQL: {err}")
