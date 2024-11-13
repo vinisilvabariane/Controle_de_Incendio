@@ -15,7 +15,7 @@ DHT dht(pinDHT, DHTTYPE);
 double Setpoint, Input, Output;
 
 // Definindo os parâmetros do PID: Kp, Ki, Kd
-double Kp = 30, Ki = 10, Kd = 0;
+double Kp = 30, Ki = 20, Kd = 0;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, REVERSE);
 
 // Configuração da média móvel para três variáveis independentes
@@ -66,7 +66,7 @@ void loop() {
   lerSensores();
   exibirDadosSerial();
   controlePID();
-  delay(200);
+  delay(100);
 }
 
 // Função de média móvel para o sensor de fumaça
@@ -120,18 +120,21 @@ void lerSensores() {
 void controlePID() {
   // Entrada para o PID é a temperatura atual
   Input = temperatura;
+  Setpoint = 30;
 
   // Caso haja chama detectada, acionar bomba no máximo
   if (statusChama == 1) {
-    analogWrite(pinBombaDeAgua, 255);  // Ativar bomba em potência máxima (PWM 255)
-    Output = 255;
-  }else{
-  // Caso não haja chama, controlar bomba com PID
-  myPID.Compute();
-  Output = constrain(Output, 0, 255);      // Garante que o valor esteja entre 0 e 255
-  if(Output<155) Output = 0;
+    Setpoint = temperatura - 1;
+    myPID.Compute();
+    Output = constrain(map(Output, 0, 255, 0, 101)+154, 154, 255);      // Garante que o valor esteja entre 0 e 255
+    analogWrite(pinBombaDeAgua, Output);
 
-  analogWrite(pinBombaDeAgua, Output);     // Saída do PID ajusta o PWM da bomba
+  }else{
+    // Caso não haja chama, controlar bomba com PID
+    myPID.Compute();
+    Output = constrain(Output, 0, 255);      // Garante que o valor esteja entre 0 e 255
+    if(Output < 154) Output = 0;
+    analogWrite(pinBombaDeAgua, Output);     // Saída do PID ajusta o PWM da bomba
   }
 
 }
