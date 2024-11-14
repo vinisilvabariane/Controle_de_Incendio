@@ -1,79 +1,53 @@
-const chart1Data = {
-  labels: ['800', '598', '100', '200', '400', '750', '900', '1000'],
-  datasets: [{
-    label: 'Temperatura',
-    data: [100, 150, 300, 500, 750, 900, 1050, 1150],
-    backgroundColor: 'red',
-    borderColor: 'red',
-    borderWidth: 1
-  }, {
-    label: 'Fumaça',
-    data: [800, 600, 100, 200, 400, 750, 900, 1000],
-    backgroundColor: 'white',
-    borderColor: 'white',
-    borderWidth: 1
-  }, {
-    label: 'Umidade',
-    data: [100, 100, 50, 50, 50, 50, 50, 50],
-    backgroundColor: 'skyblue',
-    borderColor: 'skyblue',
-    borderWidth: 1
-  }]
-};
-
-
-
-const chart2Data = {
-  labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-  datasets: [{
-    label: 'Focos de incêndio',
-    data: [2000, 1000, 3000, 6000, 8000, 12000, 16000, 30000, 45000, 48000, 28000, 10000],
-    backgroundColor: 'red',
-    borderColor: 'red',
-    borderWidth: 2
-  }]
-};
-
-const chart1Canvas = document.getElementById('chart1');
-const chart1 = new Chart(chart1Canvas, {
-  type: 'line',
-  data: chart1Data,
-  options: {
-    scales: {
-      x: { // Eixo X definido corretamente
-        beginAtZero: true, // Inicia o eixo a partir de zero
-        ticks: {
-          color: 'white' // Define a cor dos rótulos do eixo x
-        }
-      },
-      y: { // Eixo Y
-        beginAtZero: true,
-        ticks: {
-          color: 'white' // Define a cor dos rótulos do eixo y
-        }
-      }
+async function carregarDados() {
+    try {
+        const response = await fetch('/router/router.php?action=getData');
+        const dados = await response.json();
+        const dadosTemperatura = dados.map(item => item.temperatura);
+        const dadosUmidade = dados.map(item => item.umidade);
+        const dadosFumaca = dados.map(item => item.fumaca);
+        const labels = dados.map(item => item.data_verificacao);
+        atualizarGrafico(chartTemperatura, labels, dadosTemperatura);
+        atualizarGrafico(chartUmidade, labels, dadosUmidade);
+        atualizarGrafico(chartFumaca, labels, dadosFumaca);
+    } catch (error) {
+        console.error("Erro ao carregar dados:", error);
     }
-  }
+}
+
+// Função para atualizar um gráfico com novos dados
+function atualizarGrafico(grafico, labels, dados) {
+    grafico.data.labels = labels;
+    grafico.data.datasets[0].data = dados;
+    grafico.update();
+}
+
+// Criação dos gráficos com Chart.js
+const ctxTemperatura = document.getElementById('chartTemperatura').getContext('2d');
+const chartTemperatura = new Chart(ctxTemperatura, {
+    type: 'line',
+    data: {
+        labels: [], // Inicialmente vazio
+        datasets: [{
+            label: 'Temperatura (°C)',
+            data: [],
+            borderColor: 'red',
+            fill: false
+        }]
+    }
 });
 
-const chart2Canvas = document.getElementById('chart2');
-const chart2 = new Chart(chart2Canvas, {
-  type: 'bar',
-  data: chart2Data,
-  options: {
-    scales: {
-      x: { // Eixo X definido corretamente
-        beginAtZero: true, // Inicia o eixo a partir de zero
-        ticks: {
-          color: 'white' // Define a cor dos rótulos do eixo x
-        }
-      },
-      y: { // Eixo Y
-        beginAtZero: true,
-        ticks: {
-          color: 'white' // Define a cor dos rótulos do eixo y
-        }
-      }
+const ctxUmidade = document.getElementById('chartUmidade').getContext('2d');
+const chartUmidade = new Chart(ctxUmidade, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Umidade (%)',
+            data: [],
+            borderColor: 'blue',
+            fill: false
+        }]
     }
-  }
 });
+
+carregarDados();

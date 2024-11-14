@@ -1,4 +1,5 @@
 <?php
+
 include_once $_SERVER['DOCUMENT_ROOT'] . "/model/model.php";
 
 class Controller {
@@ -32,3 +33,4 @@ class Controller {
         exit;
     }
 }
+?>

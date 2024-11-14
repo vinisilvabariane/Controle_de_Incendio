@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    setInterval(requisicao, 1000);
+    setInterval(requisicao, 5000);
 });
 
 function requisicao() {
