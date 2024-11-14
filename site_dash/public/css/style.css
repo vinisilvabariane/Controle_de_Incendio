@@ -1,86 +1,76 @@
-body{
+/* Estilos Gerais */
+body {
   font-family: sans-serif;
-  background-color: #2b2828; /* Cor de fundo geral */
+  background-color: #2b2828;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Altura mínima de 100% da altura da visualização */
+  margin: 0;
 }
 
-.container {
-  max-width: 100%;/* Largura máxima do container */
-  margin: 0 auto; /* Centraliza o container */
-  background-color: #ffffff; /* Fundo branco */
-  border-radius: 8px; /* Bordas arredondadas */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra do container */
-  padding-right: 0;
-
-
+.container-fluid {
+  flex: 1; /* Ocupa o espaço entre a navbar e o footer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 20px;
 }
 
-.card-header{
-    background-color: #444444; /* Fundo mais escuro para o cabeçalho do card */
-    color: white;
-    width: 80%;
-    font-weight: bold;
+.row {
+  flex: 1;
+  display: flex;
+  width: 100%;
 }
+
 .card {
-  background-color: #3a3a3a; /* Cor de fundo do cartão */
-  border-radius: 8px; /* Bordas arredondadas */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra do cartão */
-  padding: 5px; /* Espaçamento interno do cartão */
-  flex: 1; /* Flexibilidade do cartão */
-  
-  
+  background-color: #3a3a3a;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 400px;
 }
 
-.card-title {
-  font-size: 18px; 
+.card-header {
+  background-color: #444444;
   color: white;
-  font-weight: bold; /* Negrito para o título */
-  margin-bottom: 10px; /* Margem inferior do título */
-}
-
-
-.data-label {
   font-weight: bold;
-  color:white; /* Negrito para os rótulos de dados */
+  text-align: center;
+  padding: 10px;
 }
 
-.data-value {
-  margin-left: 5px; /* Margem à esquerda do valor dos dados */
+.card-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Estilos para o formulário */
-h2 {
-  text-align: center; /* Centraliza o título do formulário */
-  color: #ffffff; /* Cor do título */
+#chartTemperatura,
+#chartUmidade {
+  width: 100%;
+  height: 100%;
 }
 
-.form-group {
-  margin-bottom: 15px; /* Margem inferior para os grupos de formulário */
+/* Responsividade */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
-.form-control {
-  border-radius: 4px; /* Bordas arredondadas para os campos de entrada */
-  border: 1px solid #ced4da; /* Borda cinza clara */
+/* Navbar */
+.custom-navbar {
+  background-color: #444444;
 }
 
-
-/* Estilos para a tabela */
-.table {
-  color: white;
-  margin-top: 30px; /* Margem superior para a tabela */
-}
-
-.table th {
-  background-color: rgb(37, 21, 21); /* Fundo azul para os cabeçalhos */
-  color: white; /* Cor branca para o texto dos cabeçalhos */
-}
-
-.table td {
-  border: 1px solid #dee2e6; /* Borda sólida para as células */
-  padding: 12px; /* Espaçamento interno das células */
-}
-
-.table th, .table td {
-  text-align: center; /* Alinhamento central para os cabeçalhos e células */
+.navbar-brand {
+  color: #680000;
+  font-weight: bold;
+  margin-left: 10px;
 }
 
 nav ul {
@@ -88,11 +78,11 @@ nav ul {
   padding: 0;
   margin: 0;
   display: flex;
+  font-weight: bold;
 }
 
 nav ul li {
   margin-left: 80px;
-
 }
 
 nav ul li a {
@@ -101,66 +91,54 @@ nav ul li a {
   font-weight: bold;
 }
 
-.custom-navbar {
-  background-color: #444444;
-}
-
 .nav-link {
-  color: white; /* Cor do texto para links */
+  color: white;
 }
 
 .nav-link:hover {
-  color: #f0f0f0; /* Cor do texto ao passar o mouse */
+  color: #f0f0f0;
 }
 
-.navbar-brand{
-  color:#680000;
-  font-weight: bold;
+/* Outros estilos */
+h2 {
+  color: white;
 }
-footer {
-  margin-top: auto;
-  padding: 20px;
+
+.table {
+  color: white;
+  margin-top: 30px;
+}
+
+.table th {
   background-color: #680000;
   color: white;
+}
+
+.table td {
+  border: 1px solid #dee2e6;
+  padding: 12px;
+}
+
+.table th,
+.table td {
   text-align: center;
-  z-index: 2;
-}
-/* Ajusta o tamanho dos gráficos */
-#chart1, #chart2 {
-  width: 80%;            /* O gráfico ocupa 100% da largura do contêiner pai */
-  max-width: 600px;      /* Define uma largura máxima para os gráficos */
-  height: 270px;         /* Define uma altura fixa para os gráficos */
-  margin: 0 auto;   
-  margin-left: 0; 
-  margin-bottom: 20px;     /* Centraliza o gráfico horizontalmente */
 }
 
-/* Media query para telas menores */
-@media (max-width: 768px) {
-  #chart1, #chart2 {
-      height: 200px;      /* Reduz a altura em telas menores */
-  }
-}
-.custom-card-graph {
-  background-color: #680000; 
-  color: white; 
+/* Footer fixo no final da página */
+.footer {
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  width: 100%;
 }
 
-.custom-card-fire {
-  background-color: #680000; 
-  color: white; 
+.footer a {
+  color: #ffc107;
+  text-decoration: none;
 }
 
-.position-relative {
-  position: relative; /* Necessário para o posicionamento absoluto da imagem */
-}
-
-.img-overlay {
-  position: absolute; /* Posiciona a imagem acima do conteúdo */
-  top: 10%; /* Ajuste a posição vertical */
-  left: 6%; /* Centraliza horizontalmente */
-  transform: translateX(-50%); /* Centraliza a imagem horizontalmente */
-  width: 40px; /* Ajuste o tamanho da imagem */
-  height: auto; /* Mantém a proporção da imagem */
-  margin-top: -10px;
+.footer a:hover {
+  color: #fff;
+  text-decoration: underline;
 }

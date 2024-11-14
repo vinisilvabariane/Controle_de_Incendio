@@ -16,7 +16,7 @@ umidade = 0
 fumacaBool = 0
 
 def iniciar_ia():
-    ia = IA_Incêndios("SAO PAULO - INTERLAGOS", range(2020, 2021))
+    ia = IA_Incêndios("Braganca Paulista", range(2020, 2021))
     ia.impotarDados()
     ia.tratarDados()
     ia.analisarDados()

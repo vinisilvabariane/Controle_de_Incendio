@@ -66,7 +66,7 @@ void loop() {
   lerSensores();
   exibirDadosSerial();
   controlePID();
-  delay(100);
+  delay(50);
 }
 
 // Função de média móvel para o sensor de fumaça
