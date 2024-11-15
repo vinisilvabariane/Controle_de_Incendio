@@ -40,6 +40,9 @@ def iniciar_ia():
             print("Arduino não pôde ser acessado\nTentando novamente...")
             time.sleep(1)
             continue
+        except IndexError:
+            time.sleep(1)
+            continue
 
         if dados["Fumaça"] >= 1023:
             fumacaBool = 1
@@ -83,7 +86,9 @@ def visualizar_ultimo_registro():
 if __name__ == "__main__":
     os.system("cls")
     while True:
-        print("\nMENU:")
+        print("---------------------------------------")
+        print("MENU:")
+        print("---------------------------------------")
         print("1. Iniciar IA de Prevenção de Incêndios")
         print("2. Visualizar Último Registro")
         print("3. Sair")
