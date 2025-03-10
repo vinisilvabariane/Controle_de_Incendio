@@ -33,19 +33,6 @@ Utilizando sensores conectados a um **Arduino** e uma **Inteligência Artificial
 
 ---
 
-## 📸 Imagens do Projeto
-
-![DHT22](https://github.com/user-attachments/assets/dht22-sensor)  
-*Exemplo do sensor DHT22 utilizado no projeto.*  
-
-![MQ-2](https://github.com/user-attachments/assets/mq2-sensor)  
-*Sensor MQ-2 para detecção de gases inflamáveis.*  
-
-![Sensor de Chama](https://github.com/user-attachments/assets/flame-sensor)  
-*Sensor de chama para monitoramento de incêndios.*  
-
----
-
 ## 🚀 Como Rodar o Projeto
 
 ### 🔹 **Requisitos**
