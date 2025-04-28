@@ -64,6 +64,10 @@ Utilizando sensores conectados a um **Arduino** e uma **Inteligência Artificial
 ---
 
 ## 🚀 Imagem do Circuito:
-![Circuito](https://github.com/user-attachments/assets/8cf39996-a7fc-4c32-a8b6-8d29c16eb0d5)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8cf39996-a7fc-4c32-a8b6-8d29c16eb0d5" alt="Circuito" width="400px">
+</p>
+
 
 
