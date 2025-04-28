@@ -3,7 +3,7 @@ import numpy as np
 import serial
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from variaveis import DADOS
+from soft_ia.Utils import DADOS
 import requests
 import locale
 from scipy.stats import pearsonr
