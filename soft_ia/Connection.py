@@ -1,7 +1,7 @@
 import mysql.connector
 import random
 from datetime import datetime
-from variaveis import HOST_DATABASE, USER_DATABASE, DATABASE, PASSWORD_DATABASE
+from Utils import HOST_DATABASE, USER_DATABASE, DATABASE, PASSWORD_DATABASE
 
 def gerarConexao() -> mysql.connector.MySQLConnection | None:
     try:
