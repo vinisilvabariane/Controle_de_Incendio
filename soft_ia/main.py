@@ -1,10 +1,10 @@
-from IA import IA_Incêndios
+from IA_Incendios import IA_Incêndios
 import numpy as np
-from variaveis import PORTA_ARDUINO
+from Utils import PORTA_ARDUINO
 import os
-from sql import inserirDados, obterUltimoRegistro
+from Connection import inserirDados, obterUltimoRegistro
 import datetime
-from serial_Arduino import obterMsgSerial
+from Serial_Arduino import obterMsgSerial
 from tabulate import tabulate  # Adicionamos a importação do tabulate
 import time
 

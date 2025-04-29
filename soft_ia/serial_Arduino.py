@@ -4,10 +4,9 @@ import re
 
 def obterMsgSerial(porta_serial:str, baud_rate = 9600 ) -> dict[str:float]:
     info = {}
-    # Abrir a conexão serial
     try:
         ser = serial.Serial(porta_serial, baud_rate, timeout=1)
-        time.sleep(2)  # Aguarda 2 segundos para a conexão estabilizar
+        time.sleep(2)
 
         while True:
             if ser.in_waiting > 0:
@@ -29,7 +28,6 @@ def obterMsgSerial(porta_serial:str, baud_rate = 9600 ) -> dict[str:float]:
         print(f"Erro ao conectar à porta serial: {e}")
 
     finally:
-        # Fechar a conexão serial ao terminar
         if ser.is_open:
             ser.close()
 

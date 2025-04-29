@@ -3,7 +3,7 @@ import numpy as np
 import serial
 from sklearn.exceptions import NotFittedError
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from soft_ia.Utils import DADOS
+from Utils import DADOS
 import requests
 import locale
 from scipy.stats import pearsonr
@@ -285,40 +285,3 @@ class IA_Incêndios():
             return self.iaTreinada.predict([[temperatura, umidade]])[0]
         except NotFittedError as error:
             print("IA não treinada")
-
-
-    # Permite que a função seja usada sem a classe estar instanciada
-    @classmethod
-    def obterLocalizacaoPorIp(self) -> dict[str, str]:
-
-        """
-        retorna um dicionário com as seguintes informações por IP:
-        ret["cidade"] = cidade
-        ret["estado"] = regiao
-        ret["pais"] = pais
-        ret["lat"] = localizacao[0]
-        ret["long"] = localizacao[1]
-        """
-
-        ret = {}
-        # Obtém os dados de localização com base no IP público
-        response = requests.get('https://ipinfo.io/')
-        data = response.json()
-
-        # Extrai informações da localização
-        cidade = data['city']
-        regiao = data['region']
-        pais = data['country']
-        localizacao = data['loc'].split(',')
-
-        ret["cidade"] = cidade
-        ret["estado"] = regiao
-        ret["pais"] = pais
-        ret["lat"] = localizacao[0]
-        ret["long"] = localizacao[1]
-
-        print(f"Cidade: {cidade}")
-        print(f"Região: {regiao}")
-        print(f"Latitude: {ret["lat"]}, Longitude: {ret["long"]}")
-
-        return ret

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 RAIZ = Path(__file__).parent.resolve()
-DADOS = RAIZ.parent / "datasets"
+DADOS = RAIZ.parent / "soft_ia/datasets"
 HOST_DATABASE = "localhost"
 USER_DATABASE = "root"
 PASSWORD_DATABASE = "123"
