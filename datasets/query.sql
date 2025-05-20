@@ -21,7 +21,7 @@ CREATE TABLE dados (
     umidade FLOAT NOT NULL,
     temperatura FLOAT NOT NULL,
     chama BOOLEAN NOT NULL,
-    data_hora DATETIME NOT NULL,
+    data_verificacao DATETIME NOT NULL,
     resultado VARCHAR(100)
 );
 
