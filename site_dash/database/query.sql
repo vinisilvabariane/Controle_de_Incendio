@@ -1,29 +1,46 @@
-DROP DATABASE projeto_incendio;
+/* ------------------------- */
+/* CRIAÇÃO DO BANCO DE DADOS */
+/* ------------------------- */
+CREATE DATABASE IF NOT EXISTS site_dash;
+USE site_dash;
 
-CREATE DATABASE projeto_incendio;
-
-USE projeto_incendio;
-
-CREATE TABLE dados (
-    idDados INT AUTO_INCREMENT PRIMARY KEY,
-    umidade DECIMAL(5,2),
-    temperatura DECIMAL(5,2),
-    chama BOOLEAN,
-    data_verificacao DATETIME,
-    resultado TEXT NOT NULL
+/* --------------------------- */
+/* CRIAÇÃO DA TABELA DE VIDEOS */
+/* --------------------------- */
+CREATE TABLE IF NOT EXISTS videos (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  link TEXT NOT NULL,
+  title VARCHAR(200) NULL,
+  priority TINYINT NOT NULL,
+  filial VARCHAR(50) NOT NULL
 );
 
-INSERT INTO dados (umidade, temperatura, chama, data_verificacao, resultado) VALUES
-(45.00, 25.30, FALSE, '2024-10-01 10:00:00', 'Segurança OK'),
-(60.50, 22.10, TRUE, '2024-10-02 11:15:00', 'Alerta: Chama e fumaça detectadas'),
-(30.25, 27.40, FALSE, '2024-10-03 12:30:00', 'Segurança OK'),
-(75.00, 24.00, TRUE,  '2024-10-04 09:45:00', 'Alerta: Chama detectada'),
-(50.00, 23.50, FALSE, '2024-10-05 14:20:00', 'Alerta: Fumaça detectada'),
-(55.10, 26.70, TRUE, '2024-10-06 15:30:00', 'Alerta: Chama e fumaça detectadas'),
-(40.00, 21.80, FALSE, '2024-10-07 16:00:00', 'Segurança OK'),
-(65.25, 28.90, TRUE,  '2024-10-08 17:10:00', 'Alerta: Chama detectada'),
-(48.30, 22.50, FALSE, '2024-10-09 18:25:00', 'Alerta: Fumaça detectada'),
-(70.00, 25.00, TRUE, '2024-10-10 19:00:00', 'Alerta: Chama e fumaça detectadas');
+UPDATE videos SET priority = :priority WHERE id = :id AND filial = :filial;
+INSERT INTO videos (link, title, priority, filial) VALUES ('FDFA', 'FDSA', 2, "FDASZ");
 
+/* --------------------------- */
+/* CRIAÇÃO DA TABELA DE USERS  */
+/* --------------------------- */
+CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(80) NOT NULL,
+    username VARCHAR(200) NOT NULL,
+    password VARCHAR(200) NOT NULL,
+    permission TINYINT NOT NULL DEFAULT 0,
+    status TINYINT NOT NULL DEFAULT 1
+);
 
-SELECT * FROM dados;
+/* ------------------------- */
+/*     SEÇÃO DE INSERTS      */
+/* ------------------------- */
+INSERT INTO users(name, username, password, permission, status)
+VALUES('Vinicius Bariane', 'vinicius.bariane', MD5('123'), 1, 1);
+
+/* ------------------------- */
+/*     SEÇÃO DE SELECTS      */
+/* ------------------------- */
+SELECT * FROM videos;
+SELECT * FROM users;
+SELECT * FROM users WHERE username = :username AND password = MD5(:password)
+SELECT * FROM videos
+SELECT * FROM videos WHERE filial = :filial ORDER BY priority ASC
