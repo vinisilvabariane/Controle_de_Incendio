@@ -1,73 +1,95 @@
 #include <DHT.h>
-#include <PID_v1.h>
 
 #define DHTPIN 2
 #define DHTTYPE DHT22
 #define FLAME_SENSOR_PIN 3
-#define FAN_IN1 5
-#define PUMP_IN1 9
+#define FAN_INA 5      // Pino INA do L9110 (PWM)
+#define FAN_INB 6      // Pino INB do L9110
+#define PUMP_MAIN 9    // Pino principal da bomba (LIGA/DESLIGA)
+#define PUMP_AUX 10    // Pino auxiliar da bomba (sentido/PWM) - opcional
 
-// Configurações de temperatura
-#define TEMP_HISTERESE 2.0  // Histerese para evitar oscilação
-#define SETPOINT 40.0       // Temperatura desejada
-#define MAX_TEMP 80.0       // Temperatura máxima de segurança
+// Parâmetros do controlador PI
+float Kp = 5.0;
+float Ki = 0.1;
+float integral = 0;
+float setpoint = 40.0;
 
 DHT dht(DHTPIN, DHTTYPE);
-
-// Variáveis PID
-double Input, Output;
-double Kp = 10.0, Ki = 0.1, Kd = 1.0;  // Valores mais conservadores
-
-PID myPID(&Input, &Output, &SETPOINT, Kp, Ki, Kd, DIRECT);
 
 void setup() {
   Serial.begin(9600);
   dht.begin();
   
   pinMode(FLAME_SENSOR_PIN, INPUT_PULLUP);
-  pinMode(FAN_IN1, OUTPUT);
-  pinMode(PUMP_IN1, OUTPUT);
+  pinMode(FAN_INA, OUTPUT);
+  pinMode(FAN_INB, OUTPUT);
+  pinMode(PUMP_MAIN, OUTPUT);
+  pinMode(PUMP_AUX, OUTPUT);
   
-  digitalWrite(FAN_IN1, LOW);
-  digitalWrite(PUMP_IN1, LOW);
+  // Desliga todos os dispositivos
+  digitalWrite(FAN_INA, LOW);
+  digitalWrite(FAN_INB, LOW);
+  digitalWrite(PUMP_MAIN, LOW);
+  digitalWrite(PUMP_AUX, LOW);  // Configuração adicional para a bomba
+  
+  Serial.println("Sistema Iniciado - Bomba nos pinos 9 e 10");
+  Serial.println("Temperatura,Setpoint,PWM,EstadoBomba");
+}
 
-  myPID.SetMode(AUTOMATIC);
-  myPID.SetOutputLimits(0, 255);
+void testBomba() {
+  Serial.println("Testando bomba...");
+  digitalWrite(PUMP_MAIN, HIGH);
+  digitalWrite(PUMP_AUX, HIGH);  // Ou LOW, dependendo do seu hardware
+  delay(2000);
+  digitalWrite(PUMP_MAIN, LOW);
+  digitalWrite(PUMP_AUX, LOW);
+  Serial.println("Teste concluído");
 }
 
 void loop() {
-  float temperature = dht.readTemperature();
-  bool flameDetected = digitalRead(FLAME_SENSOR_PIN) == LOW;
+  float temp = dht.readTemperature();
+  bool hasFlame = digitalRead(FLAME_SENSOR_PIN) == LOW;
 
-  if (isnan(temperature)) {
-    Serial.println("Erro ao ler temperatura!");
+  if (isnan(temp)) {
+    Serial.println("Erro na leitura do DHT22!");
+    delay(2000);
     return;
   }
 
-  temperature = constrain(temperature, 0, MAX_TEMP);
-  Input = temperature;
-
-  // Habilita o cálculo do PID apenas quando próximo do setpoint
-  if (temperature >= (SETPOINT - TEMP_HISTERESE)) {
-    myPID.Compute();
-    analogWrite(FAN_IN1, Output);
+  // Controle da bomba d'água (independente do PI)
+  if(hasFlame) {
+    digitalWrite(PUMP_MAIN, HIGH);
+    digitalWrite(PUMP_AUX, HIGH);  // Configuração para ligar a bomba
+    Serial.println("ALERTA: CHAMA DETECTADA - BOMBA LIGADA!");
   } else {
-    analogWrite(FAN_IN1, 0);
-    // Reseta o PID para evitar windup integral
-    myPID.SetMode(MANUAL);
-    Output = 0;
-    myPID.SetMode(AUTOMATIC);
+    digitalWrite(PUMP_MAIN, LOW);
+    digitalWrite(PUMP_AUX, LOW);
   }
 
-  // Controle da bomba
-  digitalWrite(PUMP_IN1, flameDetected ? HIGH : LOW);
+  // Controle PI da ventoinha (original)
+  int pwmValue = 0;
+  if(temp > setpoint) {
+    float error = temp - setpoint;
+    integral += error;
+    integral = constrain(integral, 0, 100/Ki);
+    pwmValue = constrain(Kp * error + Ki * integral, 0, 255);
+    
+    analogWrite(FAN_INA, pwmValue);
+    digitalWrite(FAN_INB, LOW);
+  } else {
+    digitalWrite(FAN_INA, LOW);
+    digitalWrite(FAN_INB, LOW);
+    integral = 0;
+  }
 
-  // Monitoramento
-  Serial.print(temperature);
-  Serial.print("\t");
-  Serial.print(Output);
-  Serial.print("\t");
-  Serial.println(flameDetected ? 1 : 0);
+  // Saída para plotter
+  Serial.print(temp);
+  Serial.print(",");
+  Serial.print(setpoint);
+  Serial.print(",");
+  Serial.print(pwmValue);
+  Serial.print(",");
+  Serial.println(digitalRead(PUMP_MAIN));  // Mostra estado da bomba
 
   delay(1000);
 }
