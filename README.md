@@ -59,4 +59,15 @@ Utilizando sensores conectados a um **Arduino** e uma **Inteligência Artificial
 
 4️⃣ **Testar o Sistema:**  
    - Simular diferentes condições ambientais.  
-   - Verificar se os alertas estão sendo enviados corretamente.  
+   - Verificar se os alertas estão sendo enviados corretamente.
+
+---
+
+## 🚀 Imagem do Circuito:
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8cf39996-a7fc-4c32-a8b6-8d29c16eb0d5" alt="Circuito" width="400px">
+</p>
+
+
+
