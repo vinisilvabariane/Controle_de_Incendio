@@ -5,7 +5,7 @@
 
 // ------------------- Configurações ------------------- //
 #define FLAME_SENSOR_PIN 3     // Botão simula sensor de chama
-#define MOTOR_IN1 9            // Simula a bomba (LED ou motor)
+#define MOTOR_IN1 9            
 #define MOTOR_IN2 10           // Pode ser deixado desconectado
 
 #define FAN_IN1 5              // L9110 IN1

@@ -14,6 +14,12 @@ float Ki = 0.1;
 float integral = 0;
 float setpoint = 40.0;
 
+// Variáveis para simulação
+float simulatedTemp = 25.0;  // Começa em 25°C
+bool testMode = true;        // Modo de teste ativado
+unsigned long lastUpdate = 0;
+const long tempUpdateInterval = 2000;  // Aumenta a temp a cada 2 segundos
+
 DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
@@ -30,43 +36,45 @@ void setup() {
   digitalWrite(FAN_INA, LOW);
   digitalWrite(FAN_INB, LOW);
   digitalWrite(PUMP_MAIN, LOW);
-  digitalWrite(PUMP_AUX, LOW);  // Configuração adicional para a bomba
+  digitalWrite(PUMP_AUX, LOW);
   
-  Serial.println("Sistema Iniciado - Bomba nos pinos 9 e 10");
+  Serial.println("Sistema Iniciado - Modo de Teste PI");
   Serial.println("Temperatura,Setpoint,PWM,EstadoBomba");
 }
 
-void testBomba() {
-  Serial.println("Testando bomba...");
-  digitalWrite(PUMP_MAIN, HIGH);
-  digitalWrite(PUMP_AUX, HIGH);  // Ou LOW, dependendo do seu hardware
-  delay(2000);
-  digitalWrite(PUMP_MAIN, LOW);
-  digitalWrite(PUMP_AUX, LOW);
-  Serial.println("Teste concluído");
-}
-
 void loop() {
-  float temp = dht.readTemperature();
+  float temp;
   bool hasFlame = digitalRead(FLAME_SENSOR_PIN) == LOW;
 
-  if (isnan(temp)) {
-    Serial.println("Erro na leitura do DHT22!");
-    delay(2000);
-    return;
+  if (testMode) {
+    // Modo de teste - simula aumento gradual de temperatura
+    unsigned long currentTime = millis();
+    if (currentTime - lastUpdate >= tempUpdateInterval && simulatedTemp < 60.0) {
+      simulatedTemp += 1.0;  // Aumenta 1°C a cada 2 segundos
+      lastUpdate = currentTime;
+    }
+    temp = simulatedTemp;
+  } else {
+    // Modo normal - lê do sensor
+    temp = dht.readTemperature();
+    if (isnan(temp)) {
+      Serial.println("Erro na leitura do DHT22!");
+      delay(2000);
+      return;
+    }
   }
 
   // Controle da bomba d'água (independente do PI)
   if(hasFlame) {
     digitalWrite(PUMP_MAIN, HIGH);
-    digitalWrite(PUMP_AUX, HIGH);  // Configuração para ligar a bomba
+    digitalWrite(PUMP_AUX, HIGH);
     Serial.println("ALERTA: CHAMA DETECTADA - BOMBA LIGADA!");
   } else {
     digitalWrite(PUMP_MAIN, LOW);
     digitalWrite(PUMP_AUX, LOW);
   }
 
-  // Controle PI da ventoinha (original)
+  // Controle PI da ventoinha
   int pwmValue = 0;
   if(temp > setpoint) {
     float error = temp - setpoint;
@@ -82,14 +90,14 @@ void loop() {
     integral = 0;
   }
 
-  // Saída para plotter
+  // Saída para plotter e serial
   Serial.print(temp);
   Serial.print(",");
   Serial.print(setpoint);
   Serial.print(",");
   Serial.print(pwmValue);
   Serial.print(",");
-  Serial.println(digitalRead(PUMP_MAIN));  // Mostra estado da bomba
+  Serial.println(digitalRead(PUMP_MAIN));
 
   delay(1000);
 }
