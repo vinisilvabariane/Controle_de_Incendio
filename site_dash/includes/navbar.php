@@ -1,11 +1,10 @@
 <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark shadow-sm py-2" style="border-bottom: 1px solid #ff5500;">
-  <div class="container">
+  <div class="container-fluid d-flex justify-content-start">
 
     <!-- Logo -->
-    <!-- <a class="navbar-brand d-flex align-items-center fs-4 fw-bold" href="/site_dash/views/home/" style="color: #ffffff;">
-      <img src="/site_dash/public/img/firewatch-icon.png" width="40" class="me-2" alt="FireWatch Logo">
-      <span class="text-danger">Fire</span>Watch
-    </a> -->
+    <a class="navbar-brand d-flex align-items-center fs-4 fw-bold" href="/site_dash/views/home/" style="color: #ffffff;">
+      <img src="/site_dash/public/img/imagemF_fire.png" width="40" class="me-2" alt="FireWatch Logo">
+    </a>
 
     <!-- Botão para mobile -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,7 +15,7 @@
     <div class="collapse navbar-collapse justify-content-end" id="navbarToggle">
       <ul class="navbar-nav align-items-center gap-2 gap-lg-3">
         <li class="nav-item">
-          <a class="nav-link position-relative px-2 px-lg-3 py-2" href="/site_dash/views/saque/" style="color: #ffffff; font-weight: 500;">
+          <a class="nav-link position-relative px-2 px-lg-3 py-2" href="/site_dash/views/dash/" style="color: #ffffff; font-weight: 500;">
             <i class="bi bi-fire me-1 d-lg-none"></i>
             <span>Alertas de Incêndio</span>
           </a>

@@ -25,7 +25,7 @@ class Connection
             default:
                 $this->host = "localhost";
                 $this->user = "root";
-                $this->password = "1234";
+                $this->password = "";
                 break;
         }
     }
