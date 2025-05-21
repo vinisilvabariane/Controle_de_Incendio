@@ -3,103 +3,172 @@ import numpy as np
 from Utils import PORTA_ARDUINO
 import os
 from Connection import inserirDados, obterUltimoRegistro
-import datetime
+from datetime import datetime
 from Serial_Arduino import obterMsgSerial
-from tabulate import tabulate  # Adicionamos a importação do tabulate
+from tabulate import tabulate
 import time
+import sys
 
-# Variáveis iniciais
-chama = 0
-fumaca = 0
-temperatura = 0
-umidade = 0
-fumacaBool = 0
+class SistemaPrevencaoIncendio:
+    def __init__(self):
+        self.ia = None
+        self.dados_atuais = {
+            'chama': 0,
+            'fumaca': 0,
+            'temperatura': 0,
+            'umidade': 0,
+            'fumacaBool': 0
+        }
+        self.inicializar_ia()
 
-def iniciar_ia():
-    ia = IA_Incêndios("Braganca Paulista", range(2020, 2021))
-    ia.impotarDados()
-    ia.tratarDados()
-    ia.analisarDados()
-    ia.converterEmClassificação([0, 1, 1.5, 2, 2.5, np.inf], 
-                                ["ALERTA! Altíssimo risco de incêndio", 
-                                "Alerta! Alto risco de incêndio",
-                                "Médio Risco de Incêndio",
-                                "Baixo Risco de Incêndio",
-                                "Sem Risco de Incêndio"])
-    ia.treinarIa()
+    def inicializar_ia(self):
+        """Inicializa a IA de prevenção de incêndios"""
+        try:
+            self.ia = IA_Incêndios("Braganca Paulista", range(2020, 2021))
+            self.ia.impotarDados()
+            self.ia.tratarDados()
+            self.ia.analisarDados()
+            self.ia.converterEmClassificação(
+                [0, 1, 1.5, 2, 2.5, np.inf], 
+                [
+                    "ALERTA! Altíssimo risco de incêndio", 
+                    "Alerta! Alto risco de incêndio",
+                    "Médio Risco de Incêndio",
+                    "Baixo Risco de Incêndio",
+                    "Sem Risco de Incêndio"
+                ]
+            )
+            self.ia.treinarIa()
+        except Exception as e:
+            print(f"Erro ao inicializar IA: {e}")
+            sys.exit(1)
 
-    while True:
-        dados = {}
+    def processar_dados_arduino(self):
+        """Obtém e processa os dados do Arduino"""
         try:
             dados = obterMsgSerial(PORTA_ARDUINO)
-        except PermissionError:
-            print("Erro de permissão - Arduino está inacessível\nTentando novamente...")
-            time.sleep(1)
-            continue
-        except UnboundLocalError:
-            print("Arduino não pôde ser acessado\nTentando novamente...")
-            time.sleep(1)
-            continue
-        except IndexError:
-            time.sleep(1)
-            continue
+            if not dados:
+                raise ValueError("Dados vazios recebidos do Arduino")
+            
+            # Atualiza os dados atuais
+            self.dados_atuais = {
+                'fumaca': dados.get("Fumaça", 0),
+                'umidade': dados.get("Umidade", 0),
+                'temperatura': dados.get("Temperatura", 0),
+                'chama': dados.get("Chama", 0),
+                'fumacaBool': 1 if dados.get("Fumaça", 0) >= 1023 else 0
+            }
+            
+            return True
+        except Exception as e:
+            print(f"Erro ao processar dados do Arduino: {e}")
+            return False
 
-        if dados["Fumaça"] >= 1023:
-            fumacaBool = 1
-        else:
-            fumacaBool = 0
+    def determinar_resultado(self):
+        """Determina o resultado com base nos dados e na IA"""
+        try:
+            # Previsão baseada na IA
+            resultado = self.ia.preverIncendio(
+                float(self.dados_atuais['temperatura']), 
+                self.dados_atuais['umidade']
+            )
 
-        resultado = ia.preverIncendio(float(dados["Temperatura"]), dados["Umidade"])
+            # Verificação de alertas imediatos
+            if self.dados_atuais['chama'] == 1 and self.dados_atuais['fumacaBool'] == 1:
+                return "ALERTA: Chama e fumaça detectados!"
+            elif self.dados_atuais['chama'] == 1:
+                return "ALERTA: Chama detectada!"
+            elif self.dados_atuais['fumaca'] > 1100:
+                return "ALERTA: Fumaça detectada!"
+            
+            return resultado
+        except Exception as e:
+            print(f"Erro ao determinar resultado: {e}")
+            return "Erro na análise"
 
-        if dados["Chama"] == 1 and fumacaBool == 1:
-            resultado = "Alerta: Chama e fumaça detectados!"
-        elif dados["Chama"] == 1:
-            resultado = "Alerta: Chama detectada!"
-        elif float(dados["Fumaça"]) > 1100:
-            resultado = "Alerta: Fumaça detectada!"
-
-        inserirDados(dados["Umidade"], dados["Temperatura"], dados["Chama"], fumacaBool, str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")), resultado)
-
-        # Exibe dados em uma tabela formatada
+    def exibir_dados(self, resultado):
         dados_tabela = [
-            ["Fumaça", dados["Fumaça"]],
-            ["Umidade", dados["Umidade"]],
-            ["Temperatura", dados["Temperatura"]],
-            ["Chama", "Sim" if dados["Chama"] == 1 else "Não"],
-            ["Data", str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"))],
+            ["Umidade", f"{self.dados_atuais['umidade']}%"],
+            ["Temperatura", f"{self.dados_atuais['temperatura']}°C"],
+            ["Chama", "Sim" if self.dados_atuais['chama'] == 1 else "Não"],
+            ["Data", datetime.now().strftime("%d/%m/%Y %H:%M:%S")],
             ["Resultado", resultado]
         ]
-        os.system("cls")
+        
+        os.system("cls" if os.name == 'nt' else "clear")
         print("\n" + tabulate(dados_tabela, headers=["Parâmetro", "Valor"], tablefmt="grid"))
+
+    def executar_ciclo(self):
+        """Executa um ciclo completo de leitura, processamento e exibição"""
+        if not self.processar_dados_arduino():
+            time.sleep(1)
+            return
+
+        resultado = self.determinar_resultado()
+        
+        # Inserir no banco de dados
+        try:
+            inserirDados(
+                self.dados_atuais['temperatura'],
+                self.dados_atuais['chama'],
+                datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                resultado
+            )
+        except Exception as e:
+            print(f"Erro ao inserir dados no banco: {e}")
+
+        self.exibir_dados(resultado)
         time.sleep(1)
 
 def visualizar_ultimo_registro():
+    """Exibe o último registro do banco de dados"""
     try:
         ultimo_registro = obterUltimoRegistro()
         if ultimo_registro:
-            print("Último Registro:", ultimo_registro)
+            print("\nÚltimo Registro:")
+            print("-" * 40)
+            print(f"Temperatura: {ultimo_registro[2]}°C")
+            print(f"Chama: {'Sim' if ultimo_registro[3] == 1 else 'Não'}")
+            print(f"Data: {ultimo_registro[5]}")
+            print(f"Resultado: {ultimo_registro[6]}")
+            print("-" * 40)
         else:
             print("Nenhum registro encontrado.")
     except Exception as e:
-        print("Erro ao obter o último registro:", e)
+        print(f"Erro ao obter o último registro: {e}")
+    input("\nPressione Enter para continuar...")
 
-if __name__ == "__main__":
-    os.system("cls")
+def mostrar_menu():
+    """Exibe o menu principal"""
+    os.system("cls" if os.name == 'nt' else "clear")
+    print("---------------------------------------")
+    print("SISTEMA DE PREVENÇÃO DE INCÊNDIOS")
+    print("---------------------------------------")
+    print("1. Iniciar Monitoramento Contínuo")
+    print("2. Visualizar Último Registro")
+    print("3. Sair")
+    return input("Escolha uma opção: ")
+
+def main():
+    sistema = SistemaPrevencaoIncendio()
+    
     while True:
-        print("---------------------------------------")
-        print("MENU:")
-        print("---------------------------------------")
-        print("1. Iniciar IA de Prevenção de Incêndios")
-        print("2. Visualizar Último Registro")
-        print("3. Sair")
-        opcao = input("Escolha uma opção: ")
+        opcao = mostrar_menu()
 
         if opcao == '1':
-            iniciar_ia()
+            try:
+                while True:
+                    sistema.executar_ciclo()
+            except KeyboardInterrupt:
+                print("\nMonitoramento interrompido pelo usuário")
         elif opcao == '2':
             visualizar_ultimo_registro()
         elif opcao == '3':
-            print("Saindo...")
+            print("Saindo do sistema...")
             break
         else:
             print("Opção inválida. Tente novamente.")
+            time.sleep(1)
+
+if __name__ == "__main__":
+    main()
