@@ -15,7 +15,6 @@ $(document).ready(async () => {
     $('#login').submit(async function (event) {
         event.preventDefault();
 
-        // Adiciona efeito de loading no botão
         const submitBtn = $(this).find('button[type="submit"]');
         submitBtn.prop('disabled', true);
         submitBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Carregando...');
