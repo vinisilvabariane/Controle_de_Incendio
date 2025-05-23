@@ -1,8 +1,8 @@
 /* ------------------------- */
 /* CRIAÇÃO DO BANCO DE DADOS */
 /* ------------------------- */
-CREATE DATABASE IF NOT EXISTS site_dash;
-USE site_dash;
+CREATE DATABASE IF NOT EXISTS projeto_incendio;
+USE projeto_incendio;
 
 /* --------------------------- */
 /* CRIAÇÃO DA TABELA DE USERS  */
@@ -24,6 +24,15 @@ CREATE TABLE dados (
     data_verificacao DATETIME NOT NULL,
     resultado VARCHAR(100)
 );
+
+INSERT INTO users (name, username, password, permission, status)
+VALUES 
+('Vinicius Bariane', 'vini.bariane', '202cb962ac59075b964b07152d234b70', 0, 1),
+('Maria Heloísa', 'maria.heloisa', '202cb962ac59075b964b07152d234b70', 0, 1),
+('Maria Morgado', 'maria.morgado', '202cb962ac59075b964b07152d234b70', 0, 1),
+('Gabriela Florêncio', 'gabriela.florencio', '202cb962ac59075b964b07152d234b70', 0, 1),
+('Gabriel Sampaio', 'gabriel.sampaio', '202cb962ac59075b964b07152d234b70', 0, 1),
+('Kleber Santana', 'kleber.santana', '202cb962ac59075b964b07152d234b70', 0, 1);
 
 /* ------------------------- */
 /*     SEÇÃO DE SELECTS      */
