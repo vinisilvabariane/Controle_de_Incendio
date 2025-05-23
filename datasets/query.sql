@@ -34,6 +34,15 @@ VALUES
 ('Gabriel Sampaio', 'gabriel.sampaio', '202cb962ac59075b964b07152d234b70', 0, 1),
 ('Kleber Santana', 'kleber.santana', '202cb962ac59075b964b07152d234b70', 0, 1);
 
+INSERT INTO dados (umidade, temperatura, chama, data_verificacao, resultado)
+VALUES 
+    (55.3, 25.8, 0, NOW() - INTERVAL 1 DAY, 'Normal'),
+    (53.7, 26.4, 0, NOW() - INTERVAL 12 HOUR, 'Normal'),
+    (50.2, 28.9, 0, NOW() - INTERVAL 6 HOUR, 'Normal'),
+    (48.6, 32.1, 0, NOW() - INTERVAL 3 HOUR, 'Temperatura elevada'),
+    (45.8, 36.7, 0, NOW() - INTERVAL 1 HOUR, 'Alerta de temperatura'),
+    (42.3, 41.2, 1, NOW(), 'INCÊNDIO DETECTADO');
+
 /* ------------------------- */
 /*     SEÇÃO DE SELECTS      */
 /* ------------------------- */

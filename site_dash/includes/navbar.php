@@ -32,7 +32,7 @@
             Minha Conta
           </a>
           <ul class="dropdown-menu dropdown-menu-end mt-2 border-0 shadow-sm" style="min-width: 200px; background-color: #333;">
-            <li><a class="dropdown-item py-2 text-light" href="/site_dash/views/profile/index.php"><i class="bi bi-person me-2"></i> Perfil</a></li>
+            <!-- <li><a class="dropdown-item py-2 text-light" href="/site_dash/views/profile/index.php"><i class="bi bi-person me-2"></i> Perfil</a></li> -->
             <li><hr class="dropdown-divider" style="border-color: #555;"></li>
             <li><a class="dropdown-item py-2 text-danger" href="/site_dash/views/login/"><i class="bi bi-box-arrow-right me-2"></i> Sair</a></li>
           </ul>
