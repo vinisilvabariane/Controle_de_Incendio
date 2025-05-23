@@ -8,8 +8,9 @@ class Model
 
     public function __construct()
     {
+        $e = 0;
         $this->pdo = (new Connection())->getConnection();
-        $this->pdoExceptionHandler = new PDOExceptionHandler;
+        $this->pdoExceptionHandler = new PDOExceptionHandler($e);
     }
 
     public function login(string $username, string $password): bool
