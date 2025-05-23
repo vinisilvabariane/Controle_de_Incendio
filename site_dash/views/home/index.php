@@ -35,7 +35,7 @@
                             Acompanhe em tempo real, receba alertas e gerencie situações de risco com nossa plataforma.
                         </p>
                         <div class="hero-buttons d-flex gap-3 fade-in slide-up delay-2">
-                            <a href="/site_dash/views/saque/" class="btn btn-hero-primary">
+                            <a href="/site_dash/views/dash/" class="btn btn-hero-primary">
                                 <i class="bi bi-fire me-2"></i> Ver Alertas
                             </a>
                             <a href="#features" class="btn btn-hero-outline">
@@ -46,7 +46,7 @@
                 </div>
                 <div class="col-lg-6 text-center">
                     <div class="hero-animation fade-in delay-3">
-                        <img src="/site_dash/public/img/firewatch-icon.png" alt="FireWatch" class="img-fluid" style="max-height: 400px;">
+                        <img src="/site_dash/public/img/imagemF_fire.png" alt="FireWatch" class="img-fluid" style="max-height: 400px;">
                     </div>
                 </div>
             </div>
