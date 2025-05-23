@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/site_dash/public/img/logo.svg">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/site_dash/public/img/imagemF_fire.png">
     <title>FireWatch - Monitoramento de Incêndios</title>
     <link rel="stylesheet" href="https://bootswatch.com/5/darkly/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">

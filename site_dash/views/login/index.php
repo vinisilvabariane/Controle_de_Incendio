@@ -8,89 +8,14 @@ session_destroy();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/site_dash/public/img/firewatch-icon.png">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/site_dash/public/img/imagemF_fire.png">
     <title>Fire Watch - Login</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5/dist/darkly/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/site_dash/public/css/fonts.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #4d0000 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .login-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            padding: 20px 0;
-        }
-        
-        .login-card {
-            background-color: rgba(33, 37, 41, 0.9);
-            border: 1px solid #ff5500;
-            border-radius: 10px;
-            max-width: 400px;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(255, 85, 0, 0.2);
-        }
-        
-        .login-card:before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            z-index: -1;
-            border-radius: 10px;
-            animation: glowing 3s linear infinite;
-        }
-        
-        @keyframes glowing {
-            0% { filter: blur(5px); opacity: 0.7; }
-            50% { filter: blur(7px); opacity: 1; }
-            100% { filter: blur(5px); opacity: 0.7; }
-        }
-        
-        .form-control:focus {
-            border-color: #ff5500;
-            box-shadow: 0 0 0 0.25rem rgba(255, 85, 0, 0.25);
-        }
-        
-        .btn-login {
-            background-color: #ff3300;
-            border: none;
-            transition: all 0.3s;
-        }
-        
-        .btn-login:hover {
-            background-color: #cc2900;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 60, 0, 0.4);
-        }
-        
-        .footer {
-            background-color: rgba(0, 0, 0, 0.7);
-            color: #ff9966;
-            padding: 15px 0;
-        }
-        
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 0;
-        }
-    </style>
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
@@ -104,7 +29,7 @@ session_destroy();
                     <div class="card shadow login-card">
                         <div class="card-body p-4">
                             <div class="text-center mb-4">
-                                <img src="/site_dash/public/img/firewatch-icon.png" alt="FireWatch Logo" width="70" class="mb-3">
+                                <img src="/site_dash/public/img/imagemF_fire.png" alt="FireWatch Logo" width="70" class="mb-3">
                                 <h2 class="fw-bold" style="color: #ff5500;">Fire<span style="color: #ffffff;">Watch</span></h2>
                                 <p class="text-muted mb-4">Sistema de Monitoramento</p>
                             </div>
