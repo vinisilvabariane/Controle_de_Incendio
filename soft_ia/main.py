@@ -13,11 +13,9 @@ class SistemaPrevencaoIncendio:
     def __init__(self):
         self.ia = None
         self.dados_atuais = {
-            'chama': 0,
-            'fumaca': 0,
             'temperatura': 0,
             'umidade': 0,
-            'fumacaBool': 0
+            'bomba': 0  # Estado da bomba (0 = desligada, 1 = ligada)
         }
         self.inicializar_ia()
 
@@ -52,11 +50,9 @@ class SistemaPrevencaoIncendio:
             
             # Atualiza os dados atuais
             self.dados_atuais = {
-                'fumaca': dados.get("Fumaça", 0),
-                'umidade': dados.get("Umidade", 0),
                 'temperatura': dados.get("Temperatura", 0),
-                'chama': dados.get("Chama", 0),
-                'fumacaBool': 1 if dados.get("Fumaça", 0) >= 1023 else 0
+                'umidade': dados.get("Umidade", 0),
+                'bomba': dados.get("Bomba", 0)
             }
             
             return True
@@ -70,16 +66,12 @@ class SistemaPrevencaoIncendio:
             # Previsão baseada na IA
             resultado = self.ia.preverIncendio(
                 float(self.dados_atuais['temperatura']), 
-                self.dados_atuais['umidade']
+                float(self.dados_atuais['umidade'])
             )
 
-            # Verificação de alertas imediatos
-            if self.dados_atuais['chama'] == 1 and self.dados_atuais['fumacaBool'] == 1:
-                return "ALERTA: Chama e fumaça detectados!"
-            elif self.dados_atuais['chama'] == 1:
-                return "ALERTA: Chama detectada!"
-            elif self.dados_atuais['fumaca'] > 1100:
-                return "ALERTA: Fumaça detectada!"
+            # Verificação de alertas imediatos (bomba ligada indica detecção de chama)
+            if self.dados_atuais['bomba'] == 1:
+                return "ALERTA: Incêndio detectado! Bomba acionada"
             
             return resultado
         except Exception as e:
@@ -90,7 +82,7 @@ class SistemaPrevencaoIncendio:
         dados_tabela = [
             ["Umidade", f"{self.dados_atuais['umidade']}%"],
             ["Temperatura", f"{self.dados_atuais['temperatura']}°C"],
-            ["Chama", "Sim" if self.dados_atuais['chama'] == 1 else "Não"],
+            ["Bomba", "LIGADA" if self.dados_atuais['bomba'] == 1 else "DESLIGADA"],
             ["Data", datetime.now().strftime("%d/%m/%Y %H:%M:%S")],
             ["Resultado", resultado]
         ]
@@ -110,7 +102,8 @@ class SistemaPrevencaoIncendio:
         try:
             inserirDados(
                 self.dados_atuais['temperatura'],
-                self.dados_atuais['chama'],
+                self.dados_atuais['umidade'],
+                self.dados_atuais['bomba'],
                 datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
                 resultado
             )
@@ -128,7 +121,8 @@ def visualizar_ultimo_registro():
             print("\nÚltimo Registro:")
             print("-" * 40)
             print(f"Temperatura: {ultimo_registro[2]}°C")
-            print(f"Chama: {'Sim' if ultimo_registro[3] == 1 else 'Não'}")
+            print(f"Umidade: {ultimo_registro[3]}%")
+            print(f"Bomba: {'LIGADA' if ultimo_registro[4] == 1 else 'DESLIGADA'}")
             print(f"Data: {ultimo_registro[5]}")
             print(f"Resultado: {ultimo_registro[6]}")
             print("-" * 40)

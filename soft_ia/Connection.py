@@ -1,11 +1,9 @@
 import mysql.connector
-import random
 from datetime import datetime
 from Utils import HOST_DATABASE, USER_DATABASE, DATABASE, PASSWORD_DATABASE
 
 def gerarConexao() -> mysql.connector.MySQLConnection | None:
     try:
-        # Conectando ao banco de dados MySQL
         conn = mysql.connector.connect(
             host=HOST_DATABASE,
             user=USER_DATABASE,
@@ -17,70 +15,69 @@ def gerarConexao() -> mysql.connector.MySQLConnection | None:
         print(f"Erro na conexão: {err}")
         return None
 
-def inserirDados(umidade, temperatura, chama, fumaça, data_verificacao, resultado) -> None:
-    # Cria a conexão
+def inserirDados(temperatura: float, umidade: float, bomba: int, data_verificacao: str, resultado: str) -> bool:
+    """
+    Insere dados no banco de dados
+    Retorna True se a inserção foi bem-sucedida, False caso contrário
+    """
     conn = gerarConexao()
-
     if conn is None:
         print("Falha na conexão com o banco de dados.")
-        return
-
+        return False
+    
+    cursor = None
     try:
-        # Inicializa o cursor
         cursor = conn.cursor()
-
-        # SQL para inserção com placeholders
         sql = """
-        INSERT INTO dados (umidade, temperatura, chama, fumaça, data_verificacao, resultado) 
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO dados (temperatura, umidade, chama, data_verificacao, resultado) 
+        VALUES (%s, %s, %s, %s, %s)
         """
-
-        # Executa o insert de forma segura
-        cursor.execute(sql, [umidade, temperatura, chama, fumaça, data_verificacao, resultado])
-
-        # Confirma as mudanças no banco de dados
+        # Convertendo a string de data para o formato do MySQL (YYYY-MM-DD HH:MM:SS)
+        data_mysql = datetime.strptime(data_verificacao, '%d/%m/%Y %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
+        
+        cursor.execute(sql, (temperatura, umidade, bomba, data_mysql, resultado))
         conn.commit()
-
-
+        return True
     except mysql.connector.Error as err:
-        print(f"Erro ao executar o SQL: {err}")
-        conn.rollback()  # Desfaz mudanças em caso de erro
+        print(f"Erro ao inserir dados: {err}")
+        conn.rollback()
+        return False
+    except ValueError as e:
+        print(f"Erro no formato da data: {e}")
+        return False
     finally:
-        # Garante que a conexão será fechada
         if cursor:
             cursor.close()
         if conn:
             conn.close()
 
 def obterUltimoRegistro() -> tuple:
+    """
+    Obtém o último registro inserido no banco de dados
+    Retorna uma tupla com os dados ou None em caso de erro
+    """
     conn = gerarConexao()
-
     if conn is None:
         print("Falha na conexão com o banco de dados.")
-        return
-
+        return None
+    
+    cursor = None
     try:
-        cursor = conn.cursor()
-
-        # SQL para obter o último registro com a data de verificação inferior a 1 dia
+        cursor = conn.cursor(dictionary=True)
         sql = """
-        SELECT *
+        SELECT temperatura, umidade, chama, 
+               DATE_FORMAT(data_verificacao, '%d/%m/%Y %H:%i:%s') as data_verificacao, 
+               resultado
         FROM dados 
-        WHERE STR_TO_DATE(data_verificacao, '%d/%m/%Y %H:%i:%s') < NOW() - INTERVAL 1 DAY
-        ORDER BY STR_TO_DATE(data_verificacao, '%d/%m/%Y %H:%i:%s') DESC
+        ORDER BY data_verificacao DESC
         LIMIT 1
         """
-
         cursor.execute(sql)
         resultado = cursor.fetchone()
-
-        if resultado:
-            return resultado
-        else:
-            return (0, 0, 0, 0, 0, 0, 0)
-
+        return resultado if resultado else None
     except mysql.connector.Error as err:
-        print(f"Erro ao executar a consulta: {err}")
+        print(f"Erro ao obter último registro: {err}")
+        return None
     finally:
         if cursor:
             cursor.close()
@@ -88,5 +85,21 @@ def obterUltimoRegistro() -> tuple:
             conn.close()
 
 if __name__ == "__main__":
-    inserirDados(100, 30, 0, 1, "31/10/2024 14:50:23", 200, "Baixo Risco de Incêndio")
-    print(obterUltimoRegistro())
+    # Teste da função de inserção
+    sucesso = inserirDados(
+        temperatura=30.5,
+        umidade=65.2,
+        bomba=0,
+        data_verificacao=datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+        resultado="Baixo Risco de Incêndio"
+    )
+    
+    if sucesso:
+        print("Dados inseridos com sucesso!")
+    else:
+        print("Falha ao inserir dados.")
+    
+    # Teste da função de consulta
+    ultimo_registro = obterUltimoRegistro()
+    print("\nÚltimo registro:")
+    print(ultimo_registro)

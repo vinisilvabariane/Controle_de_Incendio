@@ -34,15 +34,11 @@ class IA_Incêndios():
     iaTreinada: KNeighborsClassifier = KNeighborsClassifier(n_neighbors=1, weights="distance")
 
     def __init__(self, estado: str, anos: list[int]):
-        # Indica o estado escolhido
         self.estado = estado.upper()
         self.anos = anos
         print("IA de incêndios instanciada")
 
     def impotarDados(self):
-        """
-        Importa os dados do banco de dados INMET em formato zip
-        """
         # Cria a pasta dados caso nao exista
         if not os.path.exists(DADOS): os.mkdir(DADOS)
 
