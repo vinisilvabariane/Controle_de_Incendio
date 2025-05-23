@@ -33,7 +33,7 @@ void setup() {
   digitalWrite(PUMP_AUX, LOW);  // Configuração adicional para a bomba
   
   Serial.println("Sistema Iniciado - Bomba nos pinos 9 e 10");
-  Serial.println("Temperatura,Setpoint,PWM,EstadoBomba");
+  Serial.println("Temperatura,Umidade,Setpoint,PWM,EstadoBomba");
 }
 
 void testBomba() {
@@ -48,9 +48,10 @@ void testBomba() {
 
 void loop() {
   float temp = dht.readTemperature();
+  float humidity = dht.readHumidity();  // Nova linha para ler umidade
   bool hasFlame = digitalRead(FLAME_SENSOR_PIN) == LOW;
 
-  if (isnan(temp)) {
+  if (isnan(temp) || isnan(humidity)) {  // Verifica ambas as leituras
     Serial.println("Erro na leitura do DHT22!");
     delay(2000);
     return;
@@ -82,8 +83,10 @@ void loop() {
     integral = 0;
   }
 
-  // Saída para plotter
+  // Saída para plotter modificada para incluir umidade
   Serial.print(temp);
+  Serial.print(",");
+  Serial.print(humidity);
   Serial.print(",");
   Serial.print(setpoint);
   Serial.print(",");
