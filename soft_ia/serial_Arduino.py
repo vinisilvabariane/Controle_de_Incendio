@@ -7,42 +7,39 @@ def obterMsgSerial(porta_serial: str, baud_rate=9600) -> dict[str, float]:
     ser = None
     try:
         ser = serial.Serial(porta_serial, baud_rate, timeout=1)
-        time.sleep(2)  # Tempo para inicialização do Arduino
-
+        time.sleep(2)
         start_time = time.time()
-        while time.time() - start_time < 5:  # Timeout de 5 segundos
+        while time.time() - start_time < 5:
             if ser.in_waiting > 0:
                 linha = ser.readline().decode('ISO-8859-1').rstrip()
                 print(f"Dado recebido: {linha}")  # Debug
                 
-                # Verifica se é uma linha de dados (ignora mensagens de sistema)
-                if linha.startswith("ALERTA:") or linha.startswith("Sistema") or linha.startswith("Testando"):
+                # Ignora mensagens de sistema
+                if linha.startswith("Erro") or linha.startswith("🔥"):
                     continue
-                    
-                # Regex para o formato atual do Arduino: temperatura,setpoint,PWM,EstadoBomba
+                
+                # Padrão para o formato atual do Arduino
                 match = re.search(
-                    r'([\d.]+),([\d.]+),(\d+),(\d+)',
+                    r'Temp:\s*([\d.]+).*Umidade:\s*([\d.]+).*Ventoinha:\s*(\d+).*Bomba:\s*(LIGADA|DESLIGADA)',
                     linha
                 )
                 
                 if match:
                     info = {
                         "Temperatura": float(match.group(1)),
-                        "Setpoint": float(match.group(2)),
+                        "Umidade": float(match.group(2)),
                         "PWM": int(match.group(3)),
-                        "Bomba": int(match.group(4))
+                        "Bomba": 1 if match.group(4) == "LIGADA" else 0
                     }
                     return info
                 
         raise serial.SerialException("Nenhum dado válido recebido dentro do timeout")
-        
     except Exception as e:
         print(f"Erro: {e}")
-        return {}
-        
+        return {}    
     finally:
         if ser and ser.is_open:
             ser.close()
-
+            
 if __name__ == "__main__":
-    print(obterMsgSerial("COM3"))
+    print(obterMsgSerial("COM5"))
