@@ -15,12 +15,12 @@ def obterMsgSerial(porta_serial: str, baud_rate=9600) -> dict[str, float]:
                 print(f"Dado recebido: {linha}")  # Debug
                 
                 # Ignora mensagens de sistema
-                if linha.startswith("ALERTA:") or linha.startswith("Sistema") or linha.startswith("Testando"):
+                if linha.startswith("Erro") or linha.startswith("🔥"):
                     continue
                 
-                # Padrão atual: temperatura,umidade,setpoint,PWM,EstadoBomba
+                # Padrão para o formato atual do Arduino
                 match = re.search(
-                    r'([\d.]+),([\d.]+),([\d.]+),(\d+),(\d+)',
+                    r'Temp:\s*([\d.]+).*Umidade:\s*([\d.]+).*Ventoinha:\s*(\d+).*Bomba:\s*(LIGADA|DESLIGADA)',
                     linha
                 )
                 
@@ -28,9 +28,8 @@ def obterMsgSerial(porta_serial: str, baud_rate=9600) -> dict[str, float]:
                     info = {
                         "Temperatura": float(match.group(1)),
                         "Umidade": float(match.group(2)),
-                        "Setpoint": float(match.group(3)),
-                        "PWM": int(match.group(4)),
-                        "Bomba": int(match.group(5))
+                        "PWM": int(match.group(3)),
+                        "Bomba": 1 if match.group(4) == "LIGADA" else 0
                     }
                     return info
                 
@@ -41,6 +40,6 @@ def obterMsgSerial(porta_serial: str, baud_rate=9600) -> dict[str, float]:
     finally:
         if ser and ser.is_open:
             ser.close()
-
+            
 if __name__ == "__main__":
     print(obterMsgSerial("COM5"))
