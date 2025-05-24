@@ -11,8 +11,9 @@ class Connection
 
     public function __construct()
     {
+        $e = 0;
         $this->errorHandler = new ErrorHandler;
-        $this->pdoExceptionHandler = new PDOExceptionHandler;
+        $this->pdoExceptionHandler = new PDOExceptionHandler($e);
         set_error_handler([$this->errorHandler, 'errorHandler']);
         set_exception_handler([$this->errorHandler, 'exceptionHandler']);
 

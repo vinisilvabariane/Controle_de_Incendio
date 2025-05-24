@@ -8,20 +8,12 @@ switch ($action) {
     case "login":
         $controller->login();
         break;
-    case "videoView":
-        $controller->videoView();
-        break;
-    case "getByPriority":
-        $controller->getByPriority();
-        break;
-    case "updateVideoOrder":
-        $controller->updateVideoOrder();
-        break;
-    case "deletePathVideo";
-        $controller->deletePathVideo();
+    case "getDashboardData":
+        $controller->getDashboardData();
         break;
     default:
         header("Content-Type: application/json");
         http_response_code(405);
+        echo json_encode(["success" => false, "message" => "Ação não permitida"]);
         break;
 }

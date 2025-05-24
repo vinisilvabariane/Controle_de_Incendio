@@ -9,7 +9,7 @@
                 <a href="#"><img src="https://cdn-icons-png.flaticon.com/24/1384/1384060.png" alt="YouTube" style="filter: invert(1);" /></a>
                 <a href="#"><img src="https://cdn-icons-png.flaticon.com/24/145/145807.png" alt="LinkedIn" style="filter: invert(1);" /></a>
             </div>
-            <img src="/site_dash/public/img/firewatch-icon.png" alt="FireWatch Logo" style="width: 120px;">
+            <img src="/site_dash/public/img/imagemF_fire.png" alt="FireWatch Logo" style="width: 120px;">
         </div>
 
         <!-- Coluna 2: Informações da empresa -->
@@ -18,8 +18,8 @@
                 <strong>FIREWATCH MONITORAMENTO LTDA</strong><br>
                 CNPJ 00.000.000/0001-00<br>
                 Inscrição 000.000.000.000<br>
-                Av. dos Exemplos, Nº1001, 5º andar<br>
-                CEP 00000-000 - São Paulo – SP
+                Av. São Francisco, Nº 218, Jardim São José<br>
+                CEP 12916-900 - Bragança Paulista – SP
             </p>
         </div>
     </div>
