@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchDashboardData();
 
         // Atualizar dados a cada 5 minutos
-        setInterval(fetchDashboardData, 300000);
+        setInterval(fetchDashboardData, 5000);
     }
 
     function fetchDashboardData() {
@@ -197,7 +197,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                 if (context.datasetIndex === 2) {
                                     return context.raw ? 'Incêndio detectado' : '';
                                 }
-                                return label + context.raw.toFixed(1) + (context.datasetIndex < 2 ? '°C' : '');
+                                if (typeof context.raw === 'number') {
+                                    return label + context.raw.toFixed(1) + (context.datasetIndex < 2 ? '°C' : '');
+                                }
+                                return label + context.raw;
                             }
                         }
                     }

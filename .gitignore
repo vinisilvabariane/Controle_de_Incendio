@@ -2,3 +2,7 @@
 //database path
 datasets\
 
+soft_ia/Utils.py
+site_dash/configs/Connection.php
+soft_ia/__pycache__/Utils.cpython-313.pyc
+soft_ia/__pycache__/Connection.cpython-313.pyc
